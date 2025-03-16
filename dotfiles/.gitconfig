@@ -1,0 +1,45 @@
+# https://git-scm.com/docs/git-config
+[alias]
+	lg1 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --branches --date=short
+	lg2 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all --date=short --branches
+	lg3 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''%C(white)%s%C(reset) %C(dim white)- %an%C(reset)' --all
+	lg = !git lg1
+	log3 = log --pretty=format:'%h %ad | %s%d [%an] %Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --graph --date=short
+	log2 = log --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'
+	hist = for-each-ref --sort=committerdate refs/heads/ --format='%(color: red)%(committerdate:short) %(color: cyan)%(refname:short)'
+	st = status
+	sh = show
+	s = show
+	co = checkout
+	ci = commit
+	br = branch
+	b = branch
+	hs = hist
+	r = reset
+	names = show --name-status
+	glo = log
+	olg = log
+	gol = log
+	lgo = log
+	glo2 = log2
+	ogl2 = log2
+	lgo2 = log2
+
+[core]
+	editor = vim
+	excludesFile = ~/.gitignore_global
+	autocrlf = false
+
+[credential]
+    helper = manager
+
+[user]
+    name = David Eichiner
+    email = david.eichiner@efs-techhub.com
+
+#[commit]
+#        template = ~/.gitmessage
+
+
+[include]
+    path = ~/.gitconfig-extra

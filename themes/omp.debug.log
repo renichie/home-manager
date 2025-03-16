@@ -1,0 +1,305 @@
+
+[1m[38;2;191;207;240mVersion:[0m 23.20.3
+
+[1m[38;2;191;207;240mShell:[0m bash (5.1.16(1)-release)
+[1m[38;2;191;207;240m
+Prompt:
+
+[0m[38;2;255;255;255m [0m[0m[38;2;1;87;155;49m[7m[0m[48;2;1;87;155m[38;2;255;255;255m [0m[38;2;1;87;155;49m[7m  [27m[48;2;1;87;155m[38;2;255;255;255m[0m[38;2;1;87;155;49m[7m  [27m[48;2;1;87;155m[38;2;255;255;255mdotfiles [0m[38;2;1;87;155m[0m[0m[38;2;73;64;79;49m[7m[0m[48;2;73;64;79m[38;2;255;255;255m 0s [0m[38;2;73;64;79m[0m                                                                                                                                                        [38;2;41;49;90m[0m[48;2;41;49;90m[38;2;67;204;234m  ub422[0m[38;2;41;49;90;49m[7m / [27m[48;2;41;49;90m[38;2;67;204;234mDPC0155[0m[0m[38;2;41;49;90;49m[7m  [27m[48;2;41;49;90m[38;2;62;198;105m16:06:00 [0m
+[38;2;255;255;255m❯ [0m]0;dotfiles @ DPC0155[1m[38;2;191;207;240m
+
+Segments:
+
+[0mConsoleTitle([38;2;156;231;201mtrue[0m)  -   0 ms
+Os([38;2;156;231;201mtrue[0m)            -   0 ms
+Path([38;2;156;231;201mtrue[0m)          -   0 ms
+Executiontime([38;2;156;231;201mtrue[0m) -   0 ms
+Session([38;2;156;231;201mtrue[0m)       -   0 ms
+Time([38;2;156;231;201mtrue[0m)          -   0 ms
+Exit([38;2;156;231;201mtrue[0m)          -   0 ms
+
+[1m[38;2;191;207;240mRun duration:[0m 5.031181ms
+
+[1m[38;2;191;207;240mCache path:[0m /home/ub422/.cache/oh-my-posh
+
+[1m[38;2;191;207;240mConfig path:[0m /home/ub422/.poshthemes/config.omp.json
+[1m[38;2;191;207;240m
+Logs:
+
+[0m[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.318 [0mdebug.go:49[38;2;156;231;201m →[0m debug mode enabled
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.318 [0mterminal.go:Getenv:164[38;2;156;231;201m →[38;2;253;122;140m NO DATA
+[0m[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.318 [0mterminal.go:Getenv(LOCALAPPDATA) - [38;2;156;231;201m4.981µs[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.318 [0mterminal.go:Getenv:164[38;2;156;231;201m →[38;2;253;122;140m NO DATA
+[0m[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.318 [0mterminal.go:Getenv(OMP_CACHE_DIR) - [38;2;156;231;201m1.75µs[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.318 [0mterminal.go:Getenv:164[38;2;156;231;201m →[38;2;253;122;140m NO DATA
+[0m[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.318 [0mterminal.go:Getenv(XDG_CACHE_HOME) - [38;2;156;231;201m2.186µs[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.318 [0mterminal.go:CachePath() - [38;2;156;231;201m25.445µs[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.318 [0mterminal.go:70[38;2;156;231;201m →[0m loading cache file: /home/ub422/.cache/oh-my-posh/omp.cache
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.318 [0mterminal.go:70[38;2;156;231;201m →[0m loading cache key: environment_platform
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.318 [0mterminal.go:70[38;2;156;231;201m →[0m loading cache key: is_wsl
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.318 [0mterminal.go:70[38;2;156;231;201m →[0m loading cache key: upgrade_check
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.318 [0mterminal.go(/home/ub422/.cache/oh-my-posh/omp.cache) - [38;2;156;231;201m50.599µs[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.318 [0mterminal.go:Getenv:164[38;2;156;231;201m →[38;2;253;122;140m NO DATA
+[0m[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.318 [0mterminal.go:Getenv(LOCALAPPDATA) - [38;2;156;231;201m1.692µs[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.318 [0mterminal.go:Getenv:164[38;2;156;231;201m →[38;2;253;122;140m NO DATA
+[0m[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.318 [0mterminal.go:Getenv(OMP_CACHE_DIR) - [38;2;156;231;201m1.536µs[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.318 [0mterminal.go:Getenv:164[38;2;156;231;201m →[38;2;253;122;140m NO DATA
+[0m[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.318 [0mterminal.go:Getenv(XDG_CACHE_HOME) - [38;2;156;231;201m2.279µs[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.318 [0mterminal.go:CachePath() - [38;2;156;231;201m14.469µs[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.318 [0mterminal.go:70[38;2;156;231;201m →[0m loading cache file: /home/ub422/.cache/oh-my-posh/omp.cache.2a573a84-018f-4ad9-ac39-65f5bb61a9a9
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.318 [0mterminal.go:70[38;2;156;231;201m →[0m loading cache key: prompt_count_cache
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.318 [0mterminal.go(/home/ub422/.cache/oh-my-posh/omp.cache.2a573a84-018f-4ad9-ac39-65f5bb61a9a9) - [38;2;156;231;201m18.747µs[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.318 [0mterminal.go:setPromptCount() - [38;2;156;231;201m501ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.318 [0mterminal.go:Getenv:164[38;2;156;231;201m →[0m /home/ub422/.poshthemes/config.omp.json
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.318 [0mterminal.go:Getenv(POSH_THEME) - [38;2;156;231;201m2.121µs[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.318 [0mterminal.go:ResolveConfigPath:96[38;2;156;231;201m →[0m config set using POSH_THEME: /home/ub422/.poshthemes/config.omp.json
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.318 [0mterminal.go:ResolveConfigPath() - [38;2;156;231;201m6.278µs[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.318 [0mterminal.go:Init() - [38;2;156;231;201m170.514µs[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.318 [0mterminal.go:Flags() - [38;2;156;231;201m41ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.318 [0mload.go:loadConfig() - [38;2;156;231;201m466.118µs[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.318 [0mterminal.go:Flags() - [38;2;156;231;201m19ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.318 [0mdebug.go:57[38;2;156;231;201m →[0m terminal program: Unknown
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.318 [0mdebug.go:57[38;2;156;231;201m →[0m terminal shell: shell
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.318 [0mterminal.go:Getenv:164[38;2;156;231;201m →[38;2;253;122;140m NO DATA
+[0m[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.318 [0mterminal.go:Getenv(OMP_CACHE_DISABLED) - [38;2;156;231;201m2.183µs[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.318 [0mcolors.go:SetAccentColor() - [38;2;156;231;201m504ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.318 [0mterminal.go:Shell() - [38;2;156;231;201m177ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.318 [0mterminal.go:Getenv:164[38;2;156;231;201m →[0m 5.1.16(1)-release
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.318 [0mterminal.go:Getenv(POSH_SHELL_VERSION) - [38;2;156;231;201m1.826µs[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.318 [0mdebug.go:PrintDebug:23[38;2;156;231;201m →[0m segment: Title
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.318 [0mtext.go:Render:80[38;2;156;231;201m →[0m rendering template: {{if .Root}} ⚡ {{end}}{{.Folder | replace "~" "🏚" }} @ {{.HostName}}
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.318 [0mterminal.go:Flags() - [38;2;156;231;201m33ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal_unix.go:Root() - [38;2;156;231;201m402ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Shell() - [38;2;156;231;201m59ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:StatusCodes() - [38;2;156;231;201m41ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0mterminal_unix.go:IsWsl:35[38;2;156;231;201m →[0m false
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal_unix.go:IsWsl() - [38;2;156;231;201m4.716µs[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0mterminal.go:TemplateCache:673[38;2;156;231;201m →[0m environment: [SHELL=/bin/bash SESSION_MANAGER=local/DPC0155:@/tmp/.ICE-unix/2681,unix/DPC0155:/tmp/.ICE-unix/2681 QT_ACCESSIBILITY=1 COLORTERM=truecolor __HM_SESS_VARS_SOURCED=1 XDG_CONFIG_DIRS=/etc/xdg/xdg-ubuntu:/etc/xdg SSH_AGENT_LAUNCHER=gnome-keyring HISTCONTROL=ignoredups XDG_MENU_PREFIX=gnome- GNOME_DESKTOP_SESSION_ID=this-is-deprecated GNOME_SHELL_SESSION_MODE=ubuntu SSH_AUTH_SOCK=/run/user/1227850109/keyring/ssh LOCALE_ARCHIVE_2_27=/nix/store/7hivmh39qsl8abz86cfwc02lyqqbdw44-glibc-locales-2.40-36/lib/locale/locale-archive XMODIFIERS=@im=ibus DESKTOP_SESSION=ubuntu EDITOR=vim GTK_MODULES=gail:atk-bridge KRB5CCNAME=FILE:/tmp/krb5cc_1227850109_jfHWCz PWD=/home/ub422/configs/nix-home-config/dotfiles NIX_PROFILES=/nix/var/nix/profiles/default /home/ub422/.nix-profile LOGNAME=ub422 XDG_SESSION_DESKTOP=ubuntu XDG_SESSION_TYPE=wayland SYSTEMD_EXEC_PID=2924 XAUTHORITY=/run/user/1227850109/.mutter-Xwaylandauth.U7ZSX2 HOME=/home/ub422 USERNAME=ub422 IM_CONFIG_PHASE=1 LANG=de_DE.UTF-8 LS_COLORS=rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36: XDG_CURRENT_DESKTOP=ubuntu:GNOME POSH_SHELL_VERSION=5.1.16(1)-release POSH_SESSION_ID=2a573a84-018f-4ad9-ac39-65f5bb61a9a9 VTE_VERSION=6800 WAYLAND_DISPLAY=wayland-0 NIX_SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt OSTYPE=linux-gnu CONDA_PROMPT_MODIFIER=false GNOME_TERMINAL_SCREEN=/org/gnome/Terminal/screen/ffa13c2d_ed28_4fe7_ab3e_865405958eaf GNOME_SETUP_DISPLAY=:1 LESSCLOSE=/usr/bin/lesspipe %s %s XDG_SESSION_CLASS=user TERM=xterm-256color LESSOPEN=| /usr/bin/lesspipe %s USER=ub422 GNOME_TERMINAL_SERVICE=:1.197 DISPLAY=:0 SHLVL=1 QT_IM_MODULE=ibus POSH_THEME=/home/ub422/.poshthemes/config.omp.json XDG_RUNTIME_DIR=/run/user/1227850109 XDG_DATA_DIRS=/usr/share/ubuntu:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop:/home/ub422/.nix-profile/share:/nix/var/nix/profiles/default/share:/home/ub422/.nix-profile/share:/nix/var/nix/profiles/default/share PATH=/home/ub422/.nix-profile/bin:/nix/var/nix/profiles/default/bin:/home/ub422/.nix-profile/bin:/nix/var/nix/profiles/default/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin GDMSESSION=ubuntu HISTFILESIZE=5000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1227850109/bus POWERLINE_COMMAND=oh-my-posh _=/home/ub422/.nix-profile/bin/oh-my-posh OLDPWD=/home/ub422/configs/nix-home-config]
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m42ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:PathSeparator() - [38;2;156;231;201m2.949µs[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m18ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Pwd:189[38;2;156;231;201m →[0m /home/ub422/configs/nix-home-config/dotfiles
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Pwd() - [38;2;156;231;201m22.675µs[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0mterminal_unix.go:IsWsl:35[38;2;156;231;201m →[0m false
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal_unix.go:IsWsl() - [38;2;156;231;201m2.164µs[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m32ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m18ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m18ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m18ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m18ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m23ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m17ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m17ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m17ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m22ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0mterminal.go:User:330[38;2;156;231;201m →[0m ub422
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:User() - [38;2;156;231;201m2.352µs[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Host:347[38;2;156;231;201m →[0m DPC0155
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Host() - [38;2;156;231;201m3.009µs[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m22ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0mterminal_unix.go:Platform:92[38;2;156;231;201m →[0m ubuntu
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Getenv:164[38;2;156;231;201m →[0m 1
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Getenv(SHLVL) - [38;2;156;231;201m1.952µs[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:TemplateCache() - [38;2;156;231;201m119.232µs[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Shell() - [38;2;156;231;201m38ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Getenv:164[38;2;156;231;201m →[38;2;253;122;140m NO DATA
+[0m[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Getenv(POSH_CURSOR_LINE) - [38;2;156;231;201m1.916µs[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Getenv:164[38;2;156;231;201m →[38;2;253;122;140m NO DATA
+[0m[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Getenv(POSH_CURSOR_COLUMN) - [38;2;156;231;201m1.499µs[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Flags() - [38;2;156;231;201m31ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Flags() - [38;2;156;231;201m17ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Flags() - [38;2;156;231;201m18ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0mstatus.go:Init:53[38;2;156;231;201m →[0m {{ .Code }}
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Pwd() - [38;2;156;231;201m62ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m29ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0msegment.go:SetEnabled:115[38;2;156;231;201m →[0m segment: Exit
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:StatusCodes() - [38;2;156;231;201m42ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0mtext.go:Render:80[38;2;156;231;201m →[0m rendering template: {{ .Code }}
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Flags() - [38;2;156;231;201m22ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Flags() - [38;2;156;231;201m217ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Pwd() - [38;2;156;231;201m111ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m38ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0msegment.go:SetEnabled:115[38;2;156;231;201m →[0m segment: Path
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0mpath.go:149[38;2;156;231;201m →[0m display_cygpath: false
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m27ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m19ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:PathSeparator() - [38;2;156;231;201m1.642µs[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Pwd() - [38;2;156;231;201m40ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Shell() - [38;2;156;231;201m127ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Shell() - [38;2;156;231;201m21ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m26ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Flags() - [38;2;156;231;201m180ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0mpath.go:setMappedLocations:563[38;2;156;231;201m →[0m mapped_locations_enabled: true
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0mpath.go:setMappedLocations:564[38;2;156;231;201m →[0m 
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0mpath.go:setMappedLocations:565[38;2;156;231;201m →[0m 
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Pwd() - [38;2;156;231;201m116ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m38ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m28ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:PathSeparator() - [38;2;156;231;201m12.242µs[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m34ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Flags() - [38;2;156;231;201m134ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0msegment.go:SetEnabled:115[38;2;156;231;201m →[0m segment: Root
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal_unix.go:Root() - [38;2;156;231;201m254ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Flags() - [38;2;156;231;201m146ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Pwd() - [38;2;156;231;201m57ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m24ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:TemplateCache() - [38;2;156;231;201m240ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0msegment.go:SetEnabled:115[38;2;156;231;201m →[0m segment: Os
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m24ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0mstatus.go:Enabled:42[38;2;156;231;201m →[0m always_enabled: false
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Flags() - [38;2;156;231;201m22ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0mterminal_unix.go:Platform:92[38;2;156;231;201m →[0m ubuntu
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0mos.go:Enabled:39[38;2;156;231;201m →[0m display_distro_name: false
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Pwd() - [38;2;156;231;201m40ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0mos.go:getDistroIcon:84[38;2;156;231;201m →[0m 
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m22ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:TemplateCache() - [38;2;156;231;201m103ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0msegment.go:SetEnabled:115[38;2;156;231;201m →[0m segment: Executiontime
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0mexecutiontime.go:Enabled:57[38;2;156;231;201m →[0m always_enabled: false
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:ExecutionTime() - [38;2;156;231;201m39ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0mexecutiontime.go:Enabled:59[38;2;156;231;201m →[0m threshold: 0.000000
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0mexecutiontime.go:Enabled:63[38;2;156;231;201m →[0m dallas
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:TemplateCache() - [38;2;156;231;201m91ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m161ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m21ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0mpath.go:setMappedLocations:566[38;2;156;231;201m →[0m 
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:Pwd() - [38;2;156;231;201m205ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m52ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0mpath.go:setMappedLocations:571[38;2;156;231;201m →[0m mapped_locations: map[]
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m27ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0msegment.go:SetEnabled:115[38;2;156;231;201m →[0m segment: Git
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:PathSeparator() - [38;2;156;231;201m5.761µs[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.319 [0mterminal_unix.go:IsWsl:35[38;2;156;231;201m →[0m false
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m17ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:PathSeparator() - [38;2;156;231;201m3.127µs[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal_unix.go:IsWsl() - [38;2;156;231;201m19.622µs[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m17ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal_unix.go:IsWsl2() - [38;2;156;231;201m28.955µs[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m16ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m34ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m26ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.319 [0mterminal.go:GOOS() - [38;2;156;231;201m18ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:GOOS() - [38;2;156;231;201m345ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:GOOS() - [38;2;156;231;201m104ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:GOOS() - [38;2;156;231;201m24ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0mpath.go:makeFolderFormatMap:839[38;2;156;231;201m →[38;2;253;122;140m NO DATA
+[0m[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:GOOS() - [38;2;156;231;201m16ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0mpath.go:setStyle:218[38;2;156;231;201m →[0m agnoster_short
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0mpath.go:getAgnosterShortPath:506[38;2;156;231;201m →[0m max_depth: 1
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0mpath.go:getAgnosterShortPath:512[38;2;156;231;201m →[0m hide_root_location: false
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0mpath.go:getAgnosterShortPath:513[38;2;156;231;201m →[0m 
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0mpath.go:colorizePath:740[38;2;156;231;201m →[0m cycle: []
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0mpath.go:getFolderSeparator:273[38;2;156;231;201m →[38;2;253;122;140m NO DATA
+[0m[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0mpath.go:getFolderSeparator:275[38;2;156;231;201m →[0m <transparent>  </>
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0mpath.go:colorizePath:743[38;2;156;231;201m →[0m cycle_folder_separator: false
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0mpath.go:colorizePath:744[38;2;156;231;201m →[0m %s
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0mpath.go:colorizePath:746[38;2;156;231;201m →[0m %s
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0mpath.go:colorizePath:747[38;2;156;231;201m →[0m %s
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0mpath.go:colorizePath:748[38;2;156;231;201m →[0m %s
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:GOOS() - [38;2;156;231;201m17ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:Pwd() - [38;2;156;231;201m80ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:TemplateCache() - [38;2;156;231;201m116ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:GOOS() - [38;2;156;231;201m29ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:CommandPath(git) - [38;2;156;231;201m303.948µs[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:StackCount() - [38;2;156;231;201m63ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:HasCommand(git) - [38;2;156;231;201m307.087µs[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0mgit.go:shouldDisplay:312[38;2;156;231;201m →[0m fetch_bare_info: false
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal_unix.go:DirIsWritable(/home/ub422/configs/nix-home-config/dotfiles) - [38;2;156;231;201m5.018µs[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:Pwd() - [38;2;156;231;201m82ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:TemplateCache() - [38;2;156;231;201m42ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0mterminal.go:ResolveSymlink:286[38;2;156;231;201m →[0m /home/ub422/configs/nix-home-config/dotfiles
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:ResolveSymlink(/home/ub422/configs/nix-home-config/dotfiles) - [38;2;156;231;201m12.918µs[0m
+[38;2;253;122;140m[ERROR] [38;2;156;231;201m16:06:00.320 [0mterminal.go:HasParentFilePath:558[38;2;156;231;201m →[0m stat .git: no such file or directory
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:HasParentFilePath(.git) - [38;2;156;231;201m31.717µs[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0mtext.go:Render:80[38;2;156;231;201m →[0m rendering template: {{ if .WSL }}WSL at {{ end }}{{.Icon}} 
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:Flags() - [38;2;156;231;201m42ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0mtext.go:Render:80[38;2;156;231;201m →[0m rendering template:  {{ .Path }} 
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:Flags() - [38;2;156;231;201m87ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0mtext.go:Render:80[38;2;156;231;201m →[0m rendering template:  {{ .FormattedMs }}s 
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:Flags() - [38;2;156;231;201m96ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:TemplateCache() - [38;2;156;231;201m116ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:TemplateCache() - [38;2;156;231;201m156ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:TemplateCache() - [38;2;156;231;201m219ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0mtext.go:Render:80[38;2;156;231;201m →[0m rendering template: plain
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:Flags() - [38;2;156;231;201m44ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0mtext.go:Render:80[38;2;156;231;201m →[0m rendering template: powerline
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:Flags() - [38;2;156;231;201m18ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0mtext.go:Render:80[38;2;156;231;201m →[0m rendering template: powerline
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:Flags() - [38;2;156;231;201m18ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0mtext.go:Render:80[38;2;156;231;201m →[0m rendering template: plain
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:Flags() - [38;2;156;231;201m19ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0mtext.go:Render:80[38;2;156;231;201m →[0m rendering template: diamond
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:Flags() - [38;2;156;231;201m23ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0mtext.go:Render:80[38;2;156;231;201m →[0m rendering template: diamond
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:Flags() - [38;2;156;231;201m19ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:Shell() - [38;2;156;231;201m52ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:Shell() - [38;2;156;231;201m19ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:Flags() - [38;2;156;231;201m19ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:Pwd() - [38;2;156;231;201m68ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:GOOS() - [38;2;156;231;201m30ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0msegment.go:SetEnabled:115[38;2;156;231;201m →[0m segment: Time
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0mtime.go:Enabled:29[38;2;156;231;201m →[0m 15:04:05
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:TemplateCache() - [38;2;156;231;201m52ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:Flags() - [38;2;156;231;201m16ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:Pwd() - [38;2;156;231;201m32ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:GOOS() - [38;2;156;231;201m30ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0msegment.go:SetEnabled:115[38;2;156;231;201m →[0m segment: Session
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0mterminal.go:Getenv:164[38;2;156;231;201m →[38;2;253;122;140m NO DATA
+[0m[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:Getenv(SSH_CONNECTION) - [38;2;156;231;201m9.737µs[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0mterminal.go:Getenv:164[38;2;156;231;201m →[38;2;253;122;140m NO DATA
+[0m[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.320 [0mterminal.go:Getenv(SSH_CLIENT) - [38;2;156;231;201m1.543µs[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.320 [0mterminal_unix.go:Platform:92[38;2;156;231;201m →[0m ubuntu
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.321 [0mterminal.go:RunCommand:370[38;2;156;231;201m →[38;2;253;122;140m NO DATA
+[0m[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.321 [0mterminal.go:RunCommand(who am i) - [38;2;156;231;201m751.238µs[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.321 [0mterminal.go:TemplateCache() - [38;2;156;231;201m110ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.321 [0mtext.go:Render:80[38;2;156;231;201m →[0m rendering template: <transparent>  </>{{ .CurrentDate | date .Format }} 
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.321 [0mterminal.go:Flags() - [38;2;156;231;201m43ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.321 [0mtext.go:Render:80[38;2;156;231;201m →[0m rendering template:   {{ .UserName }}<transparent> / </>{{ .HostName }}
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.321 [0mterminal.go:Flags() - [38;2;156;231;201m98ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.321 [0mterminal.go:TemplateCache() - [38;2;156;231;201m826ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.321 [0mterminal.go:TemplateCache() - [38;2;156;231;201m113ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.321 [0mtext.go:Render:80[38;2;156;231;201m →[0m rendering template: diamond
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.321 [0mterminal.go:Flags() - [38;2;156;231;201m39ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.321 [0mtext.go:Render:80[38;2;156;231;201m →[0m rendering template: plain
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.321 [0mterminal.go:Flags() - [38;2;156;231;201m24ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.322 [0mterminal_unix.go:TerminalWidth:85[38;2;156;231;201m →[0m terminal width: 211
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.322 [0mterminal_unix.go:TerminalWidth() - [38;2;156;231;201m720.095µs[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.322 [0mterminal.go:Shell() - [38;2;156;231;201m69ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.322 [0mterminal.go:Shell() - [38;2;156;231;201m21ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.322 [0mterminal.go:Flags() - [38;2;156;231;201m33ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.322 [0mstatus.go:Init:53[38;2;156;231;201m →[0m {{ .Code }}
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.322 [0mterminal.go:Pwd() - [38;2;156;231;201m78ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.322 [0mterminal.go:GOOS() - [38;2;156;231;201m32ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.322 [0msegment.go:SetEnabled:115[38;2;156;231;201m →[0m segment: Exit
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.322 [0mterminal.go:StatusCodes() - [38;2;156;231;201m37ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.322 [0mtext.go:Render:80[38;2;156;231;201m →[0m rendering template: {{ .Code }}
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.322 [0mterminal.go:Flags() - [38;2;156;231;201m30ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.322 [0mterminal.go:TemplateCache() - [38;2;156;231;201m114ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.322 [0mstatus.go:Enabled:42[38;2;156;231;201m →[0m always_enabled: true
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.322 [0mterminal.go:TemplateCache() - [38;2;156;231;201m45ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.322 [0mtext.go:Render:80[38;2;156;231;201m →[0m rendering template: ❯ 
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.322 [0mterminal.go:Flags() - [38;2;156;231;201m19ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.322 [0mterminal.go:Flags() - [38;2;156;231;201m18ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.322 [0mtext.go:Render:80[38;2;156;231;201m →[0m rendering template: {{ if gt .Code 0 }}#ff0000{{ end }}
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.322 [0mterminal.go:Flags() - [38;2;156;231;201m17ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.322 [0mterminal.go:TemplateCache() - [38;2;156;231;201m72ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.322 [0mtext.go:Render:80[38;2;156;231;201m →[0m rendering template: plain
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.322 [0mterminal.go:Flags() - [38;2;156;231;201m40ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.322 [0mtext.go:Render:80[38;2;156;231;201m →[0m rendering template: {{ if gt .Code 0 }}#ff0000{{ end }}
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.322 [0mterminal.go:Flags() - [38;2;156;231;201m22ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.323 [0mterminal.go:TemplateCache() - [38;2;156;231;201m55ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.323 [0mterminal.go:Shell() - [38;2;156;231;201m47ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.323 [0mterminal.go:Shell() - [38;2;156;231;201m34ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.323 [0mterminal.go:Flags() - [38;2;156;231;201m30ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.323 [0mtext.go:Render:80[38;2;156;231;201m →[0m rendering template: {{if .Root}} ⚡ {{end}}{{.Folder | replace "~" "🏚" }} @ {{.HostName}}
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.323 [0mterminal.go:Flags() - [38;2;156;231;201m18ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.323 [0mterminal.go:TemplateCache() - [38;2;156;231;201m54ns[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.323 [0mterminal.go:Shell() - [38;2;156;231;201m42ns[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.323 [0mterminal.go:Getenv:164[38;2;156;231;201m →[38;2;253;122;140m NO DATA
+[0m[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.323 [0mterminal.go:Getenv(LOCALAPPDATA) - [38;2;156;231;201m2.225µs[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.323 [0mterminal.go:Getenv:164[38;2;156;231;201m →[38;2;253;122;140m NO DATA
+[0m[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.323 [0mterminal.go:Getenv(OMP_CACHE_DIR) - [38;2;156;231;201m1.711µs[0m
+[38;2;191;207;240m[DEBUG] [38;2;156;231;201m16:06:00.323 [0mterminal.go:Getenv:164[38;2;156;231;201m →[38;2;253;122;140m NO DATA
+[0m[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.323 [0mterminal.go:Getenv(XDG_CACHE_HOME) - [38;2;156;231;201m1.569µs[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.323 [0mterminal.go:CachePath() - [38;2;156;231;201m18.3µs[0m
+[38;2;204;137;214m[TRACE] [38;2;156;231;201m16:06:00.323 [0mterminal.go:Flags() - [38;2;156;231;201m31ns[0m

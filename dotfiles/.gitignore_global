@@ -1,0 +1,48 @@
+**.iml
+*.csv
+*local*.py
+**--local**
+
+docker-local
+
+**.mat
+**.tgz
+
+out/
+
+# local config / env files
+**local*.yml
+**local*.properties
+!**application-local-template.yml
+**main-local*
+**delete-roles-*.py
+**docker*env
+**local/
+**plan*txt
+**preview.yaml
+**.env
+
+# security
+**ssh*key*
+
+**.vite
+**tsbuildinfo
+
+.idea
+**.iml
+.gradle
+
+# tmp files from gnu/unix applications
+**~
+
+
+# specific files
+**jupyterhub-values-changed-only.yaml
+**/infrastructure/jupyterhub/**
+C:\Users\UB422\workspace\SDK\infrastructure\jupyterhub
+nqyerx-cron-workflow/**local*
+
+**node_modules**
+
+################################### K8S ###################################
+**.secret.yaml
