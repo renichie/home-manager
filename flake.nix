@@ -69,6 +69,7 @@
           pkgs = pkgs;
           modules = [
             ./environments/base.nix
+            ./system/manjaro.nix
             ./environments/nyx.nix
             xremap-flake.homeManagerModules.default
             {
@@ -77,7 +78,9 @@
               home.stateVersion = "24.11";
 
               # TODO: should probably not be deined here!
-              services.xremap.withX11 = true;
+              # services.xremap.withX11 = true;
+              services.xremap.enable = true;
+              services.xremap.withWlroots = true;
               services.xremap.yamlConfig = builtins.readFile ./dotfiles/xremap.config.yaml;
             }
           ];
