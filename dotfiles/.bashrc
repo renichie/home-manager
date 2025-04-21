@@ -95,8 +95,6 @@ if command -v kubectl &> /dev/null; then
 
     # Bind kubectl completion to the alias
     complete -o default -F __start_kubectl k
-else
-    echo "Warning: kubectl is not installed or not in PATH."
 fi
 
 
