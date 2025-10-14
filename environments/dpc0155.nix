@@ -9,10 +9,10 @@
   home.packages = with pkgs; [
     teams-for-linux
     vscode
-    fluxcd
 
     ### CLOUD ### 
     azure-cli
+    fluxcd
     kubectl
     kubernetes-helm
     kubelogin
@@ -26,14 +26,13 @@
     ungoogled-chromium
     maven
     pnpm
+    yq
+    jq
 
     ### MISC ###
     gimp
     xfce.thunar
     pandoc
-
-    yq
-    jq
   ];
 
   home.file."bin/chrome-disabled-web-security" = {

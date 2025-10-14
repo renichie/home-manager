@@ -21,6 +21,7 @@ alias glg='git lg1 --all'
 # ------------------------------ Tmux --------------------------------
 alias ta='tmux attach-session -t'
 alias tshared='tmux -S /var/tmux/socket attach'
+alias tls='tmux ls'
 
 # --------------------------- Navigation ------------------------------
 alias ..='cd ..'
