@@ -4,15 +4,10 @@
   # TODO: make explicit whitelist work
   # whitelist unfree software
   nixpkgs.config.allowUnfree = true;
-  #  nixpkgs.config.allowUnfreePredicate =
-  #    pkg: builtins.elem (pkgs.lib.getName pkg) [
-  #      "teams-for-linux" "idea-ultimate" "vscode"
-  #    ];
 
   # Environment specific packages
   home.packages = with pkgs; [
     teams-for-linux
-    jetbrains.idea-ultimate
     vscode
     fluxcd
 

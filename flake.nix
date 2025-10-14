@@ -40,7 +40,7 @@
               home.homeDirectory = "/home/ub422";
               home.stateVersion = "24.11";
 
-              # TODO: should probably not be deined here!
+              # TODO: probably does not belong here!
               services.xremap.withX11 = true;
               services.xremap.yamlConfig = builtins.readFile ./dotfiles/xremap.config.yaml;
             }
@@ -58,7 +58,7 @@
               home.homeDirectory = "/home/bernd";
               home.stateVersion = "24.11";
 
-              # TODO: should probably not be deined here!
+              # TODO: probably does not belong here!
               services.xremap.withX11 = true;
               services.xremap.yamlConfig = builtins.readFile ./dotfiles/xremap.config.yaml;
             }
@@ -77,7 +77,7 @@
               home.homeDirectory = "/home/bernd";
               home.stateVersion = "24.11";
 
-              # TODO: should probably not be deined here!
+              # TODO: probably does not belong here!
               # services.xremap.withX11 = true;
               services.xremap.enable = true;
               services.xremap.withWlroots = true;
