@@ -49,6 +49,7 @@ in
     vlc
     keepassxc
     obsidian
+    tokei
   ];
 
 
