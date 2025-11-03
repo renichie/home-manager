@@ -1,48 +1,44 @@
-**.iml
+################################### GENERAL ###################################
 *.csv
-*local*.py
-**--local**
-
-docker-local
-
+**.iml
 **.mat
 **.tgz
-
+**~          # tmp files from gnu/unix applications
 out/
 
-# local config / env files
-**local*.yml
-**local*.properties
-!**application-local-template.yml
-**main-local*
+################################### LOCAL CONFIG / ENV FILES ###################################
+**--local**
 **delete-roles-*.py
 **docker*env
 **local/
+**local*.properties
+**local*.py
+**local*.yml
+**main-local*
 **plan*txt
 **preview.yaml
+!**application-local-template.yml
+docker-local
+
+################################### SECURITY ###################################
+**ssh*key*
 **.env
 
-# security
-**ssh*key*
-
-**.vite
-**tsbuildinfo
-
+################################### IDE / BUILD ###################################
+.gradle
 .idea
 **.iml
-.gradle
+**.tsbuildinfo
+**.vite
 
-# tmp files from gnu/unix applications
-**~
-
-
-# specific files
-**jupyterhub-values-changed-only.yaml
-**/infrastructure/jupyterhub/**
-C:\Users\UB422\workspace\SDK\infrastructure\jupyterhub
-nqyerx-cron-workflow/**local*
-
+################################### NODE / FRONTEND ###################################
 **node_modules**
 
-################################### K8S ###################################
+################################### K8S / INFRASTRUCTURE ###################################
 **.secret.yaml
+**/infrastructure/jupyterhub/**
+**jupyterhub-values-changed-only.yaml
+C:\Users\UB422\workspace\SDK\infrastructure\jupyterhub
+
+################################### SPECIFIC FILES ###################################
+.obsidian.vimrc

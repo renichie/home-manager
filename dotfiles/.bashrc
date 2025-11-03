@@ -2,6 +2,13 @@
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
 
+# reload hotkey service (xremap)
+reload-hotkeys() {
+    systemctl --user stop xremap.service
+    sleep 1
+    systemctl --user start xremap.service
+}
+
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
 
@@ -125,11 +132,6 @@ clipc() {
     fi
 }
 
-# reload hotkey service
-reload-hotkeys() {
-    systemctl --user stop xremap.service
-    systemctl --user start xremap.service
-}
 
 # execute home-manager switch command.
 # depending on the machine hostname a different flake will be built.

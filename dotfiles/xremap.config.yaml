@@ -21,12 +21,21 @@ keymap:
     remap:
       Alt-j: Left
       Alt-l: Up
-      Alt-k: Down
       Alt-KEY_SEMICOLON: Right
+      Alt-k: Down
+    application:
+      not:
+        - /jetbrains-idea/
+        - /rustrover/
   - name: Tab navigation
     remap:
       KEY_LEFTCTRL-KEY_LEFTSHIFT-KEY_SEMICOLON: C-tab
       KEY_LEFTCTRL-KEY_LEFTSHIFT-j: C-Shift-tab
+  - name: Reload hotkeys
+
+    remap:
+      KEY_LEFTCTRL-KEY_LEFTSHIFT-r:
+        launch: ["bash", "-lc", "source ~/.bashrc; reload-hotkeys"]
   - name: "Cherry Mapping Keyboard mapping (home setup)"
     remap:
       KEY_LEFTCTRL-KEY_UP: KEY_F3

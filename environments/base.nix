@@ -27,7 +27,7 @@ in
     tmux
     oh-my-posh
 
-    ### coding ###
+    ### Git ###
     git
     git-lfs
     git-credential-manager
