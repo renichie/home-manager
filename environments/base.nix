@@ -84,9 +84,20 @@ in
   programs.atuin = {
     enable = true;
     enableBashIntegration = true;   # or enableZshIntegration / enableFishIntegration
+
+    settings = {
+      search_mode = "fuzzy";
+
+      # Make matches feel “fzf-ish”
+      # prefer_exact_match = true;
+      prefer_exact = true;
+      smart_case = true;
+
+      # Optional quality-of-life
+      style = "compact";
+      keymap = "vim-normal"; 
+    };
   };
-  # after install import old history
-  # atuin import auto
 
   programs.tmux = {
     enable = true;

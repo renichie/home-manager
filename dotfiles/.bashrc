@@ -49,6 +49,7 @@ parse_git_branch() {
 eval "$(oh-my-posh init bash --config=$HOME/.poshthemes/theme.omp.json)"
 
 eval "$(atuin init bash --disable-up-arrow)"
+eval "$(atuin gen-completions --shell bash)"
 
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
@@ -56,6 +57,7 @@ eval "$(atuin init bash --disable-up-arrow)"
 if [ -f /etc/bash_completion ]; then
     . /etc/bash_completion
 fi
+
 
 ############################# TMP BASH ADDITIONS ##############################
 # Will append everything in bashrc-additions for temporary testing
@@ -133,6 +135,7 @@ clipc() {
         return 1
     fi
 }
+alias clipcat='clipc cat'
 
 
 # execute home-manager switch command.
