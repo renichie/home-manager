@@ -64,14 +64,6 @@ in
   programs.bash.enable = true;
   programs.fzf.enable = true;
 
-  programs.vim = {
-    enable = true;
-    extraConfig = lib.mkAfter (builtins.readFile "${dotfilesDir}/.vimrc");
-    plugins = with pkgs.vimPlugins; [
-      vimNixPlugin
-    ];
-  };
-
   # might need to migrate this to environment configs at some point
   home.file = {
     ".bashrc".source = lib.mkForce "${dotfilesDir}/.bashrc";
@@ -88,6 +80,13 @@ in
     ".poshthemes/theme.omp.json".source = "${themefilesDir}/pure.omp.json";
 
   };
+
+  programs.atuin = {
+    enable = true;
+    enableBashIntegration = true;   # or enableZshIntegration / enableFishIntegration
+  };
+  # after install import old history
+  # atuin import auto
 
   programs.tmux = {
     enable = true;
@@ -108,6 +107,15 @@ in
       run-shell "~/.tmux/nord-tmux/nord.tmux"
     '';
   };
+
+  programs.vim = {
+    enable = true;
+    extraConfig = lib.mkAfter (builtins.readFile "${dotfilesDir}/.vimrc");
+    plugins = with pkgs.vimPlugins; [
+      vimNixPlugin
+    ];
+  };
+
 
   home.sessionVariables = {
     EDITOR = "vim";
