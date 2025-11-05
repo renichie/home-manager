@@ -3,6 +3,7 @@
 let
   dotfilesDir = ../dotfiles; # Path to your dotfiles directory
   themefilesDir = ../themes;
+  poshThemesDir = ../themes/posh;
   scriptfilesDir = ../scripts;
   vimNixPlugin = pkgs.vimPlugins.vim-nix;
 in
@@ -75,9 +76,10 @@ in
     ".gitignore_global".source = "${dotfilesDir}/.gitignore_global";
 
     # Setting oh-my-posh theme
-    #".poshthemes/theme.omp.json".source = "${themefilesDir}/nightowl.omp.json";
-    #".poshthemes/theme.omp.json".source = "${themefilesDir}/nordtron.omp.json";
-    ".poshthemes/theme.omp.json".source = "${themefilesDir}/pure.omp.json";
+    #".poshthemes/theme.omp.json".source = "${poshThemesDir}/nightowl.omp.json";
+    #".poshthemes/theme.omp.json".source = "${poshThemesDir}/nordtron.omp.json";
+    ".poshthemes/theme.omp.json".source = "${poshThemesDir}/pure.omp.json";
+    #".poshthemes/theme.omp.json".source = "${poshThemesDir}/config.omp.json"; # non-functional
 
   };
 
@@ -99,25 +101,6 @@ in
     };
   };
 
-  programs.tmux = {
-    enable = true;
-    secureSocket = false;
-    terminal = "tmux-256color";
-    plugins = with pkgs.tmuxPlugins; [
-      #yank
-      #sensible
-      catppuccin
-      #gruvbox
-    ];
-    extraConfig = ''
-      set -g default-terminal "tmux-256color"
-      set -ag terminal-overrides ",xterm-256color:RGB"
-      setw -g pane-base-index 1
-      # Load Nord theme
-      run-shell "git clone --depth 1 https://github.com/arcticicestudio/nord-tmux.git ~/.tmux/nord-tmux || true"
-      run-shell "~/.tmux/nord-tmux/nord.tmux"
-    '';
-  };
 
   programs.vim = {
     enable = true;
