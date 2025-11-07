@@ -54,5 +54,8 @@
     source = ../dotfiles/k9s_config.yaml;
   };
 
+  # override oh-my-posh-theme
+#  home.file.".poshthemes/theme.omp.json".source = ../themes/posh/gruvbox.omp.json;
+
 }
 

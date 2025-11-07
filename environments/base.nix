@@ -76,16 +76,16 @@ in
     ".gitignore_global".source = "${dotfilesDir}/.gitignore_global";
 
     # Setting oh-my-posh theme
-    #".poshthemes/theme.omp.json".source = "${poshThemesDir}/nightowl.omp.json";
-    #".poshthemes/theme.omp.json".source = "${poshThemesDir}/nordtron.omp.json";
-    ".poshthemes/theme.omp.json".source = "${poshThemesDir}/pure.omp.json";
-    #".poshthemes/theme.omp.json".source = "${poshThemesDir}/config.omp.json"; # non-functional
+    #".poshthemes/theme.omp.json".source = lib.mkDefault "${poshThemesDir}/nightowl.omp.json";
+#    ".poshthemes/theme.omp.json".source = lib.mkDefault "${poshThemesDir}/nordtron.omp.json";
+    ".poshthemes/theme.omp.json".source = lib.mkDefault "${poshThemesDir}/pure.omp.json";
+    #".poshthemes/theme.omp.json".source = lib.mkDefault "${poshThemesDir}/config.omp.json"; # non-functional
 
   };
 
   programs.atuin = {
     enable = true;
-    enableBashIntegration = true;   # or enableZshIntegration / enableFishIntegration
+#    enableBashIntegration = true;   # or enableZshIntegration / enableFishIntegration
 
     settings = {
       search_mode = "fuzzy";
