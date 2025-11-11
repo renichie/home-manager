@@ -28,6 +28,7 @@
     pnpm
     yq
     jq
+    bun
 
     ### MISC ###
     gimp

@@ -29,9 +29,3 @@ alias ...='cd ../..'
 alias ....='cd ../../..'
 alias .....='cd ../../../..'
 alias ......='cd ../../../../..'
-
-# ---------------------------- Functions -----------------------------
-# Generate a quick 32-char random-ish password (non-cryptographic)
-# Example: generate_password
-# Note: For stronger passwords, consider `openssl rand -base64 32` if available.
-generate_password() { date +%s | sha256sum | base64 | head -c 32 ; echo; }

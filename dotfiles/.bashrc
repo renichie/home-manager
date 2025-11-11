@@ -58,6 +58,10 @@ if [ -f /etc/bash_completion ]; then
     . /etc/bash_completion
 fi
 
+if type _tmux &>/dev/null; then
+    complete -F _tmux ta
+fi
+
 
 ############################# TMP BASH ADDITIONS ##############################
 # Will append everything in bashrc-additions for temporary testing
@@ -163,3 +167,10 @@ hm_switch() {
 
   home-manager switch --flake ~/.config/home-manager#$flake -b bckp
 }
+
+
+# ---------------------------- Utility -----------------------------
+# Generate a quick 32-char random-ish password (non-cryptographic)
+# Example: generate_password
+# Note: For stronger passwords, consider `openssl rand -base64 32` if available.
+generate_password() { date +%s | sha256sum | base64 | head -c 32 ; echo; }

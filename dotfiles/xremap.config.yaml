@@ -1,12 +1,12 @@
-modmap:
-  - name: "Cherry Mapping Keyboard mapping (home setup)"
-    remap:
-      KEY_LEFTALT: KEY_LEFTMETA
-      KEY_LEFTMETA: KEY_LEFTALT
-      KEY_F14: KEY_F1
-      KEY_F15: KEY_F2
-    device:
-      only: 'Cherry GmbH CHERRY Wired Keyboard'
+#modmap:
+#  - name: "Cherry Mapping Keyboard mapping (home setup)"
+#    remap:
+#      KEY_LEFTALT: KEY_LEFTMETA
+#      KEY_LEFTMETA: KEY_LEFTALT
+#      KEY_F14: KEY_F1
+#      KEY_F15: KEY_F2
+#    device:
+#      only: 'Cherry GmbH CHERRY Wired Keyboard'
 #  - name: "Firefox"
 #    remap:
 #      KEY_LEFTALT:
@@ -23,21 +23,20 @@ keymap:
       Alt-l: Up
       Alt-KEY_SEMICOLON: Right
       Alt-k: Down
-    application:
-      not:
-        - /jetbrains-idea/
-        - /rustrover/
+#    application:
+#      not:
+#        - /jetbrains-idea/
+#        - /rustrover/
   - name: Tab navigation
     remap:
       KEY_LEFTCTRL-KEY_LEFTSHIFT-KEY_SEMICOLON: C-tab
       KEY_LEFTCTRL-KEY_LEFTSHIFT-j: C-Shift-tab
   - name: Reload hotkeys
-
     remap:
       KEY_LEFTCTRL-KEY_LEFTSHIFT-r:
         launch: ["bash", "-lc", "source ~/.bashrc; reload-hotkeys"]
-  - name: "Cherry Mapping Keyboard mapping (home setup)"
-    remap:
-      KEY_LEFTCTRL-KEY_UP: KEY_F3
-    device:
-      only: 'Cherry GmbH CHERRY Wired Keyboard'
+#  - name: "Cherry Mapping Keyboard mapping (home setup)"
+#    remap:
+#      KEY_LEFTCTRL-KEY_UP: KEY_F3
+#    device:
+#      only: 'Cherry GmbH CHERRY Wired Keyboard'
