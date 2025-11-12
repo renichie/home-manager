@@ -3,9 +3,9 @@ alias grep='grep --color=always'
 alias hgrep='history | grep'
 alias hg='history | grep'
 alias hs='history'
-alias reload='source ~/.bashrc'
-alias loc=tokei
-alias kctx='kubectx'
+alias ll='ls -lash'
+alias reload='source ~/.zshrc'
+alias loc='tokei'
 
 # ------------------------------ Git ---------------------------------
 alias g='git'
@@ -17,7 +17,6 @@ alias gca='git commit --amend'
 alias gcane='git commit --amend --no-edit'
 alias gfa='git fetch --all'
 alias glg='git lg1 --all'
-alias gdc='git diff --cached'
 
 # ------------------------------ Tmux --------------------------------
 alias ta='tmux attach-session -t'
@@ -25,16 +24,16 @@ alias tshared='tmux -S /var/tmux/socket attach'
 alias tls='tmux ls'
 
 # --------------------------- Navigation ------------------------------
-alias cd..='cd ..'
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 alias .....='cd ../../../..'
 alias ......='cd ../../../../..'
 
-# --------------------------- Navigation ------------------------------
-alias sdkdir='cd ~/projects/sdk'
-alias sdkui='cd ~/projects/sdkui'
-alias docs='cd ~/projects/sdk/docs'
-alias vault='cd ~/documents/obsidian-vaults/work-main'
-alias priv-vault='cd ~/.sync/share-documentations/allgemein'
+# ---------------------------- Functions -----------------------------
+# Generate a quick 32-char random-ish password (non-cryptographic)
+# Example: generate_password
+# Note: For stronger passwords, consider `openssl rand -base64 32` if available.
+generate_password() {
+  date +%s | sha256sum | base64 | head -c 32; echo
+}

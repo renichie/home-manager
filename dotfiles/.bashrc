@@ -79,17 +79,12 @@ fi
 #PS1=$PS1'\[\e[m\]> ' #prompt
 
 
-################################### ALIASES ###################################
+################################### DEFAULT ALIASES ###################################
 alias ll='ls -gGh'
 alias lr='ls -lash'
 alias la='ls -A'
 alias l='ls -CF'
 
-alias gdc='git diff --cached'
-alias kctx='kubectx'
-alias sdkdir='cd ~/projects/sdk'
-alias sdkui='cd ~/projects/sdkui'
-alias docs='cd ~/projects/sdk/docs'
 alias hswitch='home-manager switch --flake ~/.config/home-manager#dpc0155 -b bckp'
 
 ####################################### KUBECTL #########################################
@@ -174,3 +169,7 @@ hm_switch() {
 # Example: generate_password
 # Note: For stronger passwords, consider `openssl rand -base64 32` if available.
 generate_password() { date +%s | sha256sum | base64 | head -c 32 ; echo; }
+
+git-prune-local-branches() {
+	git branch -vv | grep -vE "^\*|main|master" | awk '/: gone]/{print $1}' | xargs git branch -D
+}
