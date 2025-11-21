@@ -18,15 +18,16 @@
 keymap:
   - name: Global VIM Keybindings
     # No conditions here means it applies globally
+    exact_match: true
     remap:
       Alt-j: Left
       Alt-l: Up
       Alt-KEY_SEMICOLON: Right
       Alt-k: Down
-#    application:
-#      not:
-#        - /jetbrains-idea/
-#        - /rustrover/
+  #    application:
+  #      not:
+  #        - /jetbrains-idea/
+  #        - /rustrover/
   - name: Tab navigation
     remap:
       KEY_LEFTCTRL-KEY_LEFTSHIFT-KEY_SEMICOLON: C-tab
@@ -34,7 +35,7 @@ keymap:
   - name: Reload hotkeys
     remap:
       KEY_LEFTCTRL-KEY_LEFTSHIFT-r:
-        launch: ["bash", "-lc", "source ~/.bashrc; reload-hotkeys"]
+        launch: [ "bash", "-lc", "source ~/.bashrc; reload-hotkeys" ]
 #  - name: "Cherry Mapping Keyboard mapping (home setup)"
 #    remap:
 #      KEY_LEFTCTRL-KEY_UP: KEY_F3

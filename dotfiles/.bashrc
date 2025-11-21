@@ -12,12 +12,6 @@ reload-hotkeys() {
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
 
-# don't put duplicate lines in the history. See bash(1) for more options
-export HISTCONTROL=ignoredups
-# ... and ignore same sucessive entries.
-
-# remember (almost) everything
-export HISTFILESIZE=5000
 
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
@@ -50,6 +44,20 @@ eval "$(oh-my-posh init bash --config=$HOME/.poshthemes/theme.omp.json)"
 
 eval "$(atuin init bash --disable-up-arrow)"
 eval "$(atuin gen-completions --shell bash)"
+
+# don't put duplicate lines in the history. See bash(1) for more options
+export HISTCONTROL=ignoredups
+# ... and ignore same successive entries.
+
+# remember (almost) everything
+export HISTFILESIZE=5000
+
+# immediate write/read of history
+if [[ -n "$PROMPT_COMMAND" ]]; then
+    PROMPT_COMMAND="history -a; history -n; $PROMPT_COMMAND"
+else
+    PROMPT_COMMAND="history -a; history -n"
+fi
 
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
@@ -170,6 +178,16 @@ hm_switch() {
 # Note: For stronger passwords, consider `openssl rand -base64 32` if available.
 generate_password() { date +%s | sha256sum | base64 | head -c 32 ; echo; }
 
-git-prune-local-branches() {
-	git branch -vv | grep -vE "^\*|main|master" | awk '/: gone]/{print $1}' | xargs git branch -D
+git-prune-local-branches () {
+    # Delete branches whose upstream is gone
+    git branch -vv \
+        | awk '/: gone]/{print $1}' \
+        | grep -vE '^(main|master|develop)$' \
+        | xargs -r git branch -D
+
+    # Delete branches that have no upstream
+    git for-each-ref --format='%(refname:short) %(upstream)' refs/heads \
+        | awk '$2=="" {print $1}' \
+        | grep -vE '^(main|master|develop)$' \
+        | xargs -r git branch -D
 }

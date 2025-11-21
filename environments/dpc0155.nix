@@ -1,5 +1,7 @@
 { config, lib, pkgs, ... }:
-
+let
+  homeDir = config.home.homeDirectory;
+in
 {
   # TODO: make explicit whitelist work
   # whitelist unfree software
@@ -19,7 +21,7 @@
     kubectx
     kubecolor
     kubeseal
-    krew
+    krew # needs `export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH` for installs
 
     ### DEVELOPMENT PACKAGES ###
     nodejs_22
@@ -28,18 +30,19 @@
     pnpm
     yq
     jq
-    bun
+    bun # needs `export PATH="$HOME/.bun/bin:$PATH"` for global installs
 
     ### MISC ###
     gimp
     xfce.thunar
     pandoc
+    peek
   ];
 
   home.file."bin/chrome-disabled-web-security" = {
     text = ''
       #!/bin/sh
-      exec chromium --disable-web-security --user-data-dir="/tmp/chromium-disabled-ws"
+      exec chromium --disable-web-security --user-data-dir="/tmp/chromium-disabled-ws" --no-sandbox
     '';
     executable = true;
   };
@@ -56,7 +59,6 @@
   };
 
   # override oh-my-posh-theme
-#  home.file.".poshthemes/theme.omp.json".source = ../themes/posh/gruvbox.omp.json;
-
+  #  home.file.".poshthemes/theme.omp.json".source = ../themes/posh/gruvbox.omp.json;
 }
 

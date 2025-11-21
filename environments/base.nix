@@ -51,6 +51,9 @@ in
     keepassxc
     obsidian
     tokei
+
+    ### UI ###
+    redshift
   ];
 
 
@@ -131,5 +134,28 @@ in
       Restart = "on-failure";
       RestartSec = "10s";
     };
+  };
+
+  services.redshift = {
+    enable = true;
+
+    # Location: manual coordinates
+    provider = "manual";        # or "geoclue2" if you have geoclue set up
+    latitude = 48.1;
+    longitude = 11.6;
+
+    temperature = {
+      day = 6500;
+      night = 3000;
+    };
+
+    # Optional: more aggressive night tint
+    # temperature.night = 2700;
+
+    settings.redshift = {
+      brightness-day = 1.0;
+      brightness-night = 0.8;
+    };
+
   };
 }
