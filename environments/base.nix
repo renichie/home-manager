@@ -23,10 +23,11 @@ in
 
   home.packages = with pkgs; [
     # base packages -- define here what should be in every overlay
-    #vim
     bash
     tmux
     oh-my-posh
+    # vim
+    neovim
 
     ### Git ###
     git
@@ -73,6 +74,7 @@ in
     ".bashrc".source = lib.mkForce "${dotfilesDir}/.bashrc";
     ".bash_aliases".source = lib.mkForce "${dotfilesDir}/.bash_aliases";
     ".vimrc".source = lib.mkForce "${dotfilesDir}/.vimrc";
+    ".config/nvim/init.vim".source = lib.mkForce "${dotfilesDir}/init.vim";
     ".ideavimrc".source = "${dotfilesDir}/.vimrc";
     ".tmux.conf".source = lib.mkForce "${dotfilesDir}/.tmux.conf";
     ".gitconfig".source = "${dotfilesDir}/.gitconfig";

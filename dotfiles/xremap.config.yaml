@@ -23,7 +23,13 @@ keymap:
       Alt-j: Left
       Alt-l: Up
       Alt-KEY_SEMICOLON: Right
+      Alt-KEY_RIGHTBRACE: Right
       Alt-k: Down
+
+      # experimental! need to check how this interacts globally!
+      Alt-Ctrl-j: Alt-Left
+      Alt-Ctrl-KEY_SEMICOLON: Alt-Right
+
   #    application:
   #      not:
   #        - /jetbrains-idea/

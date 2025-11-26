@@ -184,10 +184,4 @@ git-prune-local-branches () {
         | awk '/: gone]/{print $1}' \
         | grep -vE '^(main|master|develop)$' \
         | xargs -r git branch -D
-
-    # Delete branches that have no upstream
-    git for-each-ref --format='%(refname:short) %(upstream)' refs/heads \
-        | awk '$2=="" {print $1}' \
-        | grep -vE '^(main|master|develop)$' \
-        | xargs -r git branch -D
 }

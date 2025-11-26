@@ -26,7 +26,7 @@
 	lgo2 = log2
 
 [core]
-	editor = vim
+	editor = nvim
 	excludesFile = ~/.gitignore_global
 	autocrlf = false
 
