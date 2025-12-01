@@ -52,6 +52,8 @@ in
     keepassxc
     obsidian
     tokei
+    ripgrep
+    ripgrep-all
 
     ### UI ###
     redshift
@@ -93,6 +95,8 @@ in
 #    enableBashIntegration = true;   # or enableZshIntegration / enableFishIntegration
 
     settings = {
+      auto_sync = true;
+      sync_frequency = "10s";
       search_mode = "fuzzy";
 
       # Make matches feel “fzf-ish”
