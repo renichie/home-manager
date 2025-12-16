@@ -12,6 +12,40 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
+
+  -- Gruvbox Material theme
+  {
+    "sainnhe/gruvbox-material",
+    config = function()
+      -- Theme options (see plugin README for more)
+      vim.o.background = "dark"                 -- or "light"
+      vim.g.gruvbox_material_background = "medium"  -- "hard", "medium", "soft"
+      vim.g.gruvbox_material_enable_italic = 1
+      vim.g.gruvbox_material_better_performance = 1
+
+      vim.cmd("colorscheme gruvbox-material")
+    end,
+  },
+
+  -- vim-polyglot (syntax & filetype support for many languages)
+  {
+    "sheerun/vim-polyglot",
+    lazy = false,   -- load immediately (optional — can omit)
+  },
+
+  -- nvim-treesitter (better syntax highlighting / parsing)
+  {
+    "nvim-treesitter/nvim-treesitter",
+    build = ":TSUpdate",
+    config = function()
+      require("nvim-treesitter.configs").setup({
+        ensure_installed = { "c", "lua", "vim", "vimdoc", "python", "javascript", "html", "typescript", "rust", "kotlin", "java" },  -- add languages you need
+        sync_install = false,
+        highlight = { enable = true, additional_vim_regex_highlighting = false },
+        indent    = { enable = true },
+      })
+    end,
+  },
   {
     "allaman/emoji.nvim",
     dependencies = {
@@ -24,7 +58,9 @@ require("lazy").setup({
     end,
   },
 })
+
 EOF
+
 
 set noswapfile
 set number
