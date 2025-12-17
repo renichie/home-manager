@@ -35,7 +35,7 @@ docker-local
 **node_modules**
 
 ################################### K8S / INFRASTRUCTURE ###################################
-**.secret.yaml
+**.secret*.yaml
 **/infrastructure/jupyterhub/**
 **jupyterhub-values-changed-only.yaml
 C:\Users\UB422\workspace\SDK\infrastructure\jupyterhub
