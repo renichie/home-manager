@@ -52,12 +52,12 @@ export HISTCONTROL=ignoredups
 # remember (almost) everything
 export HISTFILESIZE=5000
 
-# immediate write/read of history
-if [[ -n "$PROMPT_COMMAND" ]]; then
-    PROMPT_COMMAND="history -a; history -n; $PROMPT_COMMAND"
-else
-    PROMPT_COMMAND="history -a; history -n"
-fi
+# # immediate write/read of history
+# if [[ -n "$PROMPT_COMMAND" ]]; then
+#     PROMPT_COMMAND="history -a; history -n; $PROMPT_COMMAND"
+# else
+#     PROMPT_COMMAND="history -a; history -n"
+# fi
 
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
