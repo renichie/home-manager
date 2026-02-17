@@ -42,6 +42,7 @@
 
               # TODO: probably does not belong here!
               services.xremap.withX11 = true;
+              services.xremap.watch = true;
               services.xremap.yamlConfig = builtins.readFile ./dotfiles/xremap.config.yaml;
             }
           ];
@@ -60,6 +61,7 @@
 
               # TODO: probably does not belong here!
               services.xremap.withX11 = true;
+              services.xremap.watch = true;
               services.xremap.yamlConfig = builtins.readFile ./dotfiles/xremap.config.yaml;
             }
           ];
@@ -81,6 +83,7 @@
               # services.xremap.withX11 = true;
               services.xremap.enable = true;
               services.xremap.withWlroots = true;
+              services.xremap.watch = true;
               services.xremap.yamlConfig = builtins.readFile ./dotfiles/xremap.config.yaml;
             }
           ];
