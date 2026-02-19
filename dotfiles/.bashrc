@@ -66,6 +66,19 @@ if [ -f /etc/bash_completion ]; then
     . /etc/bash_completion
 fi
 
+# Reuse git's completion for the `g` alias.
+if command -v git &>/dev/null; then
+    if type _completion_loader &>/dev/null; then
+        _completion_loader git
+    fi
+
+    if type __git_complete &>/dev/null && type __git_main &>/dev/null; then
+        __git_complete g __git_main
+    elif type __git_wrap__git_main &>/dev/null; then
+        complete -o bashdefault -o default -o nospace -F __git_wrap__git_main g
+    fi
+fi
+
 if type _tmux &>/dev/null; then
     complete -F _tmux ta
 fi
