@@ -37,6 +37,7 @@ in
     xfce.thunar
     pandoc
     peek
+    ydotool
   ];
 
   home.file."bin/chrome-disabled-web-security" = {
@@ -60,5 +61,21 @@ in
 
   # override oh-my-posh-theme
   #  home.file.".poshthemes/theme.omp.json".source = ../themes/posh/gruvbox.omp.json;
-}
 
+  systemd.user.services.ydotoold = {
+    Unit = {
+      Description = "ydotool daemon";
+      After = [ "default.target" ];
+    };
+    Install = {
+      WantedBy = [ "default.target" ];
+    };
+    Service = {
+      Type = "simple";
+      ExecStartPre = "${pkgs.coreutils}/bin/rm -f %t/.ydotool_socket";
+      ExecStart = "${pkgs.ydotool}/bin/ydotoold --socket-path %t/.ydotool_socket";
+      Restart = "on-failure";
+      RestartSec = "1s";
+    };
+  };
+}
