@@ -6,6 +6,7 @@ alias hs='history'
 alias reload='source ~/.bashrc'
 alias loc=tokei
 alias kctx='kubectx'
+alias open=xdg-open
 
 # ------------------------------ Git ---------------------------------
 alias g='git'
@@ -32,9 +33,11 @@ alias ....='cd ../../..'
 alias .....='cd ../../../..'
 alias ......='cd ../../../../..'
 
-# --------------------------- Navigation ------------------------------
+# --------------------------- Navigation WORK -------------------------
 alias sdkdir='cd ~/projects/sdk'
 alias sdkui='cd ~/projects/sdkui'
 alias docs='cd ~/projects/sdk/docs'
 alias vault='cd ~/documents/obsidian-vaults/work-main'
-alias priv-vault='cd ~/.sync/share-documentations/main'
+alias vault-priv='cd ~/.sync/share-documentations/main'
+
+
