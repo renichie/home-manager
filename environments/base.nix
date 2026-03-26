@@ -54,6 +54,7 @@ in
     tokei
     ripgrep
     ripgrep-all
+    glow # markdown renderer
 
     ### UI ###
     redshift
@@ -121,7 +122,7 @@ in
 
 
   home.sessionVariables = {
-    EDITOR = "vim";
+    EDITOR = "nvim";
   };
 
   fonts.fontconfig.enable = true;
