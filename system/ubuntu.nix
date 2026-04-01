@@ -1,7 +1,28 @@
 
 { config, lib, pkgs, ... }:
 
+let
+  nixGLCommand = "${pkgs.nixgl.nixGLIntel}/bin/nixGLIntel";
+  wrapCommandPackage =
+    {
+      package,
+      executable,
+      script,
+      name ? "${package.pname or (lib.getName package)}-ubuntu-electron",
+    }:
+    pkgs.symlinkJoin {
+      inherit name;
+      paths = [ package ];
+      postBuild = ''
+        rm -f "$out/bin/${executable}"
+        ln -s ${pkgs.writeShellScript executable script} "$out/bin/${executable}"
+      '';
+    };
+in
 {
+  _module.args.ubuntuElectron = {
+    inherit nixGLCommand wrapCommandPackage;
+  };
 
   home.packages = with pkgs; [
     nordic # gnome theme

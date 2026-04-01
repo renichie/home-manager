@@ -13,18 +13,22 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nixgl.url = "github:nix-community/nixGL";
 
     # Add the xremap nix-flake input
     xremap-flake.url = "github:xremap/nix-flake";
   };
 
-  outputs = { self, nixpkgs, home-manager, xremap-flake, ... }:
+  outputs = { self, nixpkgs, home-manager, nixgl, xremap-flake, ... }:
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs {
         inherit system;
         # Apply the xremap overlay from xremap-flake
-        overlays = [ xremap-flake.overlays.default ];
+        overlays = [
+          nixgl.overlay
+          xremap-flake.overlays.default
+        ];
       };
     in {
       homeConfigurations = {

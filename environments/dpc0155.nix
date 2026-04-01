@@ -1,6 +1,28 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, ubuntuElectron ? null, ... }:
 let
   homeDir = config.home.homeDirectory;
+  teamsForLinuxPackage =
+    if ubuntuElectron == null then
+      pkgs.teams-for-linux
+    else
+      ubuntuElectron.wrapCommandPackage {
+        package = pkgs.teams-for-linux;
+        executable = "teams-for-linux";
+        script = ''
+          exec ${ubuntuElectron.nixGLCommand} ${pkgs.electron_34}/bin/electron --no-sandbox --use-angle=gl ${pkgs.teams-for-linux}/share/teams-for-linux/app.asar "$@"
+        '';
+      };
+  vscodePackage =
+    if ubuntuElectron == null then
+      pkgs.vscode
+    else
+      ubuntuElectron.wrapCommandPackage {
+        package = pkgs.vscode;
+        executable = "code";
+        script = ''
+          exec ${ubuntuElectron.nixGLCommand} ${pkgs.vscode}/bin/code --no-sandbox --use-angle=gl "$@"
+        '';
+      };
 in
 {
   # TODO: make explicit whitelist work
@@ -9,8 +31,8 @@ in
 
   # Environment specific packages
   home.packages = with pkgs; [
-    teams-for-linux
-    vscode
+    teamsForLinuxPackage
+    vscodePackage
 
     ### CLOUD ### 
     azure-cli

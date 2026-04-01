@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, ubuntuElectron ? null, ... }:
 
 let
   dotfilesDir = ../dotfiles; # Path to your dotfiles directory
@@ -6,6 +6,17 @@ let
   poshThemesDir = ../themes/posh;
   scriptfilesDir = ../scripts;
   vimNixPlugin = pkgs.vimPlugins.vim-nix;
+  obsidianPackage =
+    if ubuntuElectron == null then
+      pkgs.obsidian
+    else
+      ubuntuElectron.wrapCommandPackage {
+        package = pkgs.obsidian;
+        executable = "obsidian";
+        script = ''
+          exec ${ubuntuElectron.nixGLCommand} ${pkgs.electron_34}/bin/electron --no-sandbox --use-angle=gl ${pkgs.obsidian}/share/obsidian/app.asar "$@"
+        '';
+      };
 in
 {
   # this should always be overwritten!
@@ -50,7 +61,7 @@ in
     xsel
     vlc
     keepassxc
-    obsidian
+    obsidianPackage
     tokei
     ripgrep
     ripgrep-all
