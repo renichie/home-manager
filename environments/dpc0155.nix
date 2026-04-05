@@ -28,7 +28,6 @@ in
   # TODO: make explicit whitelist work
   # whitelist unfree software
   nixpkgs.config.allowUnfree = true;
-
   # Environment specific packages
   home.packages = with pkgs; [
     teamsForLinuxPackage
@@ -47,7 +46,6 @@ in
 
     ### DEVELOPMENT PACKAGES ###
     nodejs_22
-    ungoogled-chromium
     maven
     pnpm
     yq
