@@ -87,6 +87,12 @@ in
   home.file = {
     ".bashrc".source = lib.mkForce "${dotfilesDir}/.bashrc";
     ".bash_aliases".source = lib.mkForce "${dotfilesDir}/.bash_aliases";
+
+    # AI agent sandbox wrapper (bubblewrap-based)
+    ".local/bin/agent-sandbox.sh" = {
+      source = "${scriptfilesDir}/agent-sandbox.sh";
+      executable = true;
+    };
     ".vimrc".source = lib.mkForce "${dotfilesDir}/.vimrc";
     ".config/nvim/init.vim".source = lib.mkForce "${dotfilesDir}/init.vim";
     ".ideavimrc".source = "${dotfilesDir}/.vimrc";

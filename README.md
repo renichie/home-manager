@@ -4,6 +4,10 @@ Homemanager setup for personal use.
 
 Feel free to use as you like :)
 
+## Docs
+
+- [AI Agent Sandboxing](docs/agent-sandboxing.md) — bubblewrap-basierte Isolation für Copilot CLI und Codex
+
 ## Installation
 
 ### 
