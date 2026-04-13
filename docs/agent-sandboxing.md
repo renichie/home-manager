@@ -18,7 +18,7 @@ Der Sandbox-Ansatz hier setzt auf **defense in depth** für den normalen Dev-Wor
 
 | Bereich | Verhalten im Sandbox |
 |---|---|
-| Dateisystem | Nur das aktuelle Repo ist beschreibbar (unter `/workspace`) |
+| Dateisystem | Nur das aktuelle Repo ist beschreibbar (unter `/workspace`); `.git/` wird standardmäßig read-only übermountet |
 | Home-Verzeichnis | Temporäres Scratch-Home, wird nach der Session gelöscht |
 | Credentials | Nur explizit kopierte Auth-Dateien sichtbar (kein `$HOME`) |
 | Prozesse | Eigener PID-Namespace — Agent sieht keine Host-Prozesse |
@@ -27,7 +27,7 @@ Der Sandbox-Ansatz hier setzt auf **defense in depth** für den normalen Dev-Wor
 
 **Was nicht verhindert wird:**
 
-- Alles innerhalb von `/workspace` kann der Agent lesen, schreiben und löschen
+- Fast alles innerhalb von `/workspace` kann der Agent lesen, schreiben und löschen; `.git/` ist standardmäßig read-only
 - Bei aktivem Netzwerk kann der Agent externe APIs erreichen (notwendig für Modellanfragen)
 - Kernel-Exploits / Container-Escapes (dafür bräuchte man gVisor oder MicroVMs)
 
@@ -58,7 +58,7 @@ Bubblewrap erstellt beim Start einen frischen **Mount-Namespace**: Nur die expli
 Kurz gesagt funktioniert es so:
 
 - `agent-sandbox.sh` startet `bwrap` mit eigenen User/PID/IPC/UTS-Namespaces.
-- Das Projekt wird als `/workspace` read-write gemountet; Systempfade (`/usr`, `/nix`, Teile von `/etc`) nur read-only.
+- Das Projekt wird als `/workspace` read-write gemountet; `.git/` wird standardmäßig read-only übermountet. Systempfade (`/usr`, `/nix`, Teile von `/etc`) sind ebenfalls nur read-only.
 - Der Agent läuft mit einem temporären `/home/user`; nach Ende wird dieses gelöscht (außer persistente Settings unter `~/.config/agent-sandbox/`).
 
 Das Scratch-Home wird mit `mktemp -d` erstellt. Beim Exit werden temporäre Daten gelöscht; Agent-Settings werden separat persistent gespeichert. Es enthält nur:
@@ -98,7 +98,7 @@ Nach `hm_switch` stehen folgende Shell-Funktionen zur Verfügung:
 
 ```bash
 copilot                # Default: Sandbox + --allow-all
-codex                  # Default: Sandbox + --full-auto
+codex                  # Default: Sandbox + --full-auto, aber .git/ read-only
 copilot-vanilla        # Host-Copilot ohne Sandbox
 codex-vanilla          # Host-Codex ohne Sandbox
 sbx                    # Sandbox für $PWD, interaktive Bash
@@ -134,6 +134,8 @@ Extra Bind-Mounts für Sonderfälle:
 EXTRA_RO="/pfad/host:/pfad/sandbox" sbx-codex   # zusätzlicher Read-Only-Mount
 EXTRA_BIND="/pfad/host:/pfad/sandbox" sbx-codex  # zusätzlicher Read-Write-Mount
 ```
+
+Standardmäßig wird `.git/` read-only übermountet. Damit funktionieren `git status`, `git log` und `git diff` weiter, aber Schreiboperationen wie `git add`, `git commit`, `git fetch` oder `git push` scheitern an den Git-Metadaten.
 
 ## Logging und Diagnose
 
@@ -179,7 +181,7 @@ grep "$HOME" ~/.local/state/agent-sandbox/*trace*
 | Prozess-Isolation | ✅ Gut — eigener PID/IPC/UTS-Namespace |
 | Netzwerk-Isolation | ⚠️ Optional — standardmäßig offen (Agents brauchen API-Zugriff) |
 | Syscall-Filterung | ❌ Kein seccomp — Kernel-Angriffsfläche bleibt |
-| Schutz innerhalb `/workspace` | ❌ Kein — Agent kann das Repo vollständig verändern |
+| Schutz innerhalb `/workspace` | ⚠️ Teilweise — Worktree ist schreibbar, `.git/` aber standardmäßig read-only |
 | Kernel-Escape-Schutz | ❌ Kein — dafür gVisor oder MicroVM nötig |
 
 **Geeignet für:** Lokale Dev-Workflows, eigene Projekte, Pair-Programming mit KI-Agenten.  

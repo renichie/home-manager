@@ -201,6 +201,10 @@ HOME_BIND_ARGS=()
 [[ -d "$HOME/.local/bin" ]]   && HOME_BIND_ARGS+=(--ro-bind "$HOME/.local/bin"   /home/user/.local/bin)
 [[ -d "$HOME/.bun" ]]         && HOME_BIND_ARGS+=(--ro-bind "$HOME/.bun"         /home/user/.bun)
 
+# Keep Git metadata read-only by default while leaving the worktree writable.
+PROJECT_GIT_ARGS=()
+[[ -d "$PROJECT/.git" ]] && PROJECT_GIT_ARGS=(--ro-bind "$PROJECT/.git" /workspace/.git)
+
 # ---------------------------------------------------------------------------
 # PATH inside sandbox
 # ---------------------------------------------------------------------------
@@ -293,6 +297,7 @@ printf '\n' >&2
   "${EXTRA_RO_ARGS[@]}" \
   \
   --bind "$PROJECT" /workspace \
+  "${PROJECT_GIT_ARGS[@]}" \
   --chdir /workspace \
   \
   --dir /home/user \
