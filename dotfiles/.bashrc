@@ -137,23 +137,34 @@ export PATH="$HOME/.terraform.versions:$PATH"
 ####################################### ADDITIONAL CMDS ###################################
 # copies the output of the command at $1 to the clipboard
 clipc() {
+    if [ "$#" -eq 0 ]; then
+        echo "Usage: clipc <command> [args...]" >&2
+        return 1
+    fi
+
+    local -a clipboard_cmd
+
     # Attempt to detect which clipboard tool is available
     if command -v pbcopy &>/dev/null; then
         # macOS
-        "$@" | pbcopy
+        clipboard_cmd=(pbcopy)
     elif command -v xclip &>/dev/null; then
         # Linux with xclip
-        "$@" | xclip -selection c
+        clipboard_cmd=(xclip -selection c)
     elif command -v xsel &>/dev/null; then
         # Linux with xsel
-        "$@" | xsel --clipboard --input
+        clipboard_cmd=(xsel --clipboard --input)
     elif command -v clip.exe &>/dev/null; then
         # WSL on Windows
-        "$@" | clip.exe
+        clipboard_cmd=(clip.exe)
     else
         echo "No supported clipboard tool found. Please install pbcopy, xclip, xsel, or run in an environment with 'clip.exe' available." >&2
         return 1
     fi
+
+    local quoted_cmd
+    printf -v quoted_cmd '%q ' "$@"
+    eval "$quoted_cmd" | "${clipboard_cmd[@]}"
 }
 alias clipcat='clipc cat'
 
