@@ -19,6 +19,27 @@ alias gcane='git commit --amend --no-edit'
 alias gfa='git fetch --all'
 alias glg='git lg1 --all'
 alias gdc='git diff --cached'
+gitall() {
+  case "${1:-}" in
+    -h|--help|"")
+      cat <<'EOF'
+gitall - führt einen beliebigen git-Befehl in allen Git-Repositories unterhalb
+des aktuellen Verzeichnisses aus.
+
+Verwendung:
+  gitall <git-subcommand> [args...]
+EOF
+      [ -z "${1:-}" ] && return 1 || return 0
+      ;;
+  esac
+
+  find . -type d -name .git -prune | while read -r gitdir; do
+    repo="${gitdir%/.git}"
+    printf '===== %s =====\n' "$repo"
+    git -C "$repo" --no-pager -c color.ui=always "$@"
+    printf '\n'
+  done
+}
 
 # ------------------------------ Tmux --------------------------------
 alias ta='tmux attach-session -t'
@@ -49,8 +70,8 @@ codex-vanilla()    { command codex "$@"; }
 
 # --------------------------- Navigation WORK -------------------------
 alias sdkdir='cd ~/projects/sdk'
-alias sdkui='cd ~/projects/sdkui'
-alias docs='cd ~/projects/sdk/docs'
+alias sdkui='cd ~/projects/sdk-core/sdkui'
+alias docs='cd ~/projects/sdk/sdk-docs'
 alias vault='cd ~/documents/obsidian-vaults/work-main'
 alias vault-priv='cd ~/.sync/share-documentations/main'
 
