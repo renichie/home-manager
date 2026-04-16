@@ -121,12 +121,26 @@ codex-vanilla --prompt "..."   # Host-Codex explizit ohne Sandbox
 sbx -n codex                   # Codex ohne Netz (explizit)
 ```
 
-Persistente Settings für Modell/Defaults (auch wenn im Sandbox geändert):
+Persistente Settings und Codex-Session-State:
 
 ```bash
 ~/.config/agent-sandbox/codex/config.toml
 ~/.config/agent-sandbox/copilot/config.json
+~/.local/state/agent-sandbox/codex/home/
+~/.local/state/agent-sandbox/codex/xdg-state/
 ```
+
+Für Codex wird nicht nur `~/.codex/` gespiegelt, sondern zusätzlich auch XDG-State unter `~/.local/state/codex/`, weil die Resume-/History-Daten je nach CLI-Version nicht konsistent nur an einer Stelle liegen.
+
+Praktisch heißt das:
+
+- Session-Dateien wie `~/.codex/sessions/...jsonl` werden nach `~/.local/state/agent-sandbox/codex/home/` persistiert.
+- Zusätzlicher Codex-State unter `~/.local/state/codex/` wird nach `~/.local/state/agent-sandbox/codex/xdg-state/` persistiert.
+- Beim nächsten Sandbox-Start werden beide Verzeichnisse wieder in das temporäre Home eingespielt.
+
+Damit funktioniert mindestens `codex resume --last` auch über mehrere Sandbox-Runs hinweg.
+
+Der interaktive Resume-Picker kann je nach Codex-Version trotzdem unvollständig sein, obwohl die Session-Dateien bereits vorhanden sind. In dem Fall ist `codex resume --last` der zuverlässigere Weg.
 
 Extra Bind-Mounts für Sonderfälle:
 
@@ -147,6 +161,7 @@ project=/home/ub422/projects/myapp
 no_net=0
 dbus=yes
 settings_root=/home/ub422/.config/agent-sandbox
+state_root=/home/ub422/.local/state/agent-sandbox
 cmd=copilot --allow-all
 ```
 

@@ -17,6 +17,7 @@
 #   EXTRA_BIND="h:c ..."         Space-separated read-write bind pairs (host:container)
 #   EXTRA_RO="h:c ..."           Space-separated read-only bind pairs (host:container)
 #   SANDBOX_SETTINGS_DIR=/path   Persistent settings dir (default: ~/.config/agent-sandbox)
+#   SANDBOX_STATE_DIR=/path      Persistent state dir (default: ~/.local/state/agent-sandbox)
 #
 # Examples:
 #   agent-sandbox.sh                        # sandbox $PWD, bash
@@ -62,9 +63,36 @@ CMD=("${@:-bash}")
 SANDBOX_HOME="$(mktemp -d "${XDG_RUNTIME_DIR:-/tmp}/agent-home.XXXXXX")"
 
 SETTINGS_ROOT="${SANDBOX_SETTINGS_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/agent-sandbox}"
+STATE_ROOT="${SANDBOX_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/agent-sandbox}"
 PERSIST_COPILOT_CONFIG="$SETTINGS_ROOT/copilot/config.json"
 PERSIST_CODEX_CONFIG="$SETTINGS_ROOT/codex/config.toml"
-mkdir -p "$(dirname "$PERSIST_COPILOT_CONFIG")" "$(dirname "$PERSIST_CODEX_CONFIG")"
+PERSIST_CODEX_HOME="$STATE_ROOT/codex/home"
+PERSIST_CODEX_XDG_STATE="$STATE_ROOT/codex/xdg-state"
+mkdir -p \
+  "$(dirname "$PERSIST_COPILOT_CONFIG")" \
+  "$(dirname "$PERSIST_CODEX_CONFIG")" \
+  "$PERSIST_CODEX_HOME" \
+  "$PERSIST_CODEX_XDG_STATE"
+
+sync_tree() {
+  local src="$1"
+  local dest="$2"
+  shift 2
+
+  mkdir -p "$dest"
+  if command -v rsync &>/dev/null; then
+    rsync -a --delete "$@" "$src"/ "$dest"/
+    return
+  fi
+
+  (
+    cd "$src"
+    tar -cf - "$@" .
+  ) | (
+    cd "$dest"
+    tar -xf -
+  )
+}
 
 cleanup() {
   local rc=$?
@@ -76,6 +104,20 @@ cleanup() {
   if [[ -f "$SANDBOX_HOME/.codex/config.toml" ]]; then
     cp "$SANDBOX_HOME/.codex/config.toml" "$PERSIST_CODEX_CONFIG" || true
   fi
+  {
+    printf 'cleanup_codex_home_exists=%s\n' "$([[ -d "$SANDBOX_HOME/.codex" ]] && echo yes || echo no)"
+    printf 'cleanup_codex_xdg_state_exists=%s\n' "$([[ -d "$SANDBOX_HOME/.local/state/codex" ]] && echo yes || echo no)"
+  } >> "$LOGFILE" 2>/dev/null || true
+  if [[ -d "$SANDBOX_HOME/.codex" ]]; then
+    sync_tree "$SANDBOX_HOME/.codex" "$PERSIST_CODEX_HOME" \
+      --exclude auth.json \
+      --exclude config.toml \
+      --exclude tmp \
+      --exclude .tmp || true
+  fi
+  if [[ -d "$SANDBOX_HOME/.local/state/codex" ]]; then
+    sync_tree "$SANDBOX_HOME/.local/state/codex" "$PERSIST_CODEX_XDG_STATE" || true
+  fi
 
   rm -rf "$SANDBOX_HOME"
   exit "$rc"
@@ -85,6 +127,7 @@ trap cleanup EXIT
 mkdir -p \
   "$SANDBOX_HOME/.config" \
   "$SANDBOX_HOME/.cache" \
+  "$SANDBOX_HOME/.local/state" \
   "$SANDBOX_HOME/.local/share" \
   "$SANDBOX_HOME/.local/bin"
 
@@ -114,6 +157,20 @@ fi
 if [[ -f "$HOME/.codex/auth.json" ]]; then
   mkdir -p "$SANDBOX_HOME/.codex"
   cp "$HOME/.codex/auth.json" "$SANDBOX_HOME/.codex/auth.json"
+fi
+
+if [[ -d "$PERSIST_CODEX_HOME" ]]; then
+  mkdir -p "$SANDBOX_HOME/.codex"
+  sync_tree "$PERSIST_CODEX_HOME" "$SANDBOX_HOME/.codex" \
+    --exclude auth.json \
+    --exclude config.toml \
+    --exclude tmp \
+    --exclude .tmp
+fi
+
+if [[ -d "$PERSIST_CODEX_XDG_STATE" ]]; then
+  mkdir -p "$SANDBOX_HOME/.local/state/codex"
+  sync_tree "$PERSIST_CODEX_XDG_STATE" "$SANDBOX_HOME/.local/state/codex"
 fi
 
 CODEX_SOURCE_CONFIG=""
@@ -241,6 +298,7 @@ LOGFILE="$LOGDIR/$(date +%Y%m%d-%H%M%S)-$$.log"
   printf 'no_net=%q\n'  "$NO_NET"
   printf 'dbus=%s\n'    "$DBUS_ENABLED"
   printf 'settings_root=%q\n' "$SETTINGS_ROOT"
+  printf 'state_root=%q\n' "$STATE_ROOT"
   printf 'cmd='
   printf '%q ' "${CMD[@]}"
   printf '\n'
@@ -270,6 +328,7 @@ printf '[agent-sandbox] network=%s dbus=%s trace=%s\n' \
   "$DBUS_ENABLED" \
   "$TRACE_ENABLED" >&2
 printf '[agent-sandbox] settings_root=%s\n' "$SETTINGS_ROOT" >&2
+printf '[agent-sandbox] state_root=%s\n' "$STATE_ROOT" >&2
 printf '[agent-sandbox] logfile=%s\n' "$LOGFILE" >&2
 printf '[agent-sandbox] cmd=' >&2
 printf '%q ' "${CMD[@]}" >&2
@@ -308,6 +367,7 @@ printf '\n' >&2
   --setenv HOME            /home/user \
   --setenv XDG_CONFIG_HOME /home/user/.config \
   --setenv XDG_CACHE_HOME  /home/user/.cache \
+  --setenv XDG_STATE_HOME  /home/user/.local/state \
   --setenv XDG_DATA_HOME   /home/user/.local/share \
   --setenv PATH            "$SANDBOX_PATH" \
   --setenv TERM            "${TERM:-xterm-256color}" \
