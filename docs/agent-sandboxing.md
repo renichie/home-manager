@@ -67,7 +67,7 @@ Das Scratch-Home wird mit `mktemp -d` erstellt. Beim Exit werden temporäre Date
 - Genau die benötigten Agent-Dateien (Copilot: `~/.copilot/config.json`, Codex: `~/.codex/auth.json` + `~/.codex/config.toml`)
 - Eine modifizierte Config mit `/workspace` als vertrauenswürdigem Ordner (damit der Trust-Dialog nicht bei jedem Start erscheint)
 
-Settings (z. B. Model-Auswahl) aus Sandbox-Sessions werden nach `~/.config/agent-sandbox/` synchronisiert und beim nächsten Start wieder geladen.
+Settings und lokaler Session-State aus Sandbox-Sessions werden nach `~/.config/agent-sandbox/` bzw. `~/.local/state/agent-sandbox/` synchronisiert und beim nächsten Start wieder geladen.
 
 ## Voraussetzungen
 
@@ -121,14 +121,25 @@ codex-vanilla --prompt "..."   # Host-Codex explizit ohne Sandbox
 sbx -n codex                   # Codex ohne Netz (explizit)
 ```
 
-Persistente Settings und Codex-Session-State:
+Persistente Settings und lokaler Agent-State:
 
 ```bash
 ~/.config/agent-sandbox/codex/config.toml
 ~/.config/agent-sandbox/copilot/config.json
+~/.local/state/agent-sandbox/copilot/home/
 ~/.local/state/agent-sandbox/codex/home/
 ~/.local/state/agent-sandbox/codex/xdg-state/
 ```
+
+Für Copilot wird neben `config.json` auch der restliche Inhalt von `~/.copilot/` in einen separaten State-Pfad gespiegelt. Damit bleiben lokale Sessions, Resume-Metadaten, Logs und andere CLI-Artefakte über mehrere Sandbox-Runs hinweg erhalten, ohne die modifizierte `config.json` mit dem Trust-Eintrag mit dem übrigen State zu vermischen.
+
+Praktisch heißt das:
+
+- Inhalte aus `~/.copilot/` außer `config.json` werden nach `~/.local/state/agent-sandbox/copilot/home/` persistiert.
+- Beim nächsten Sandbox-Start wird dieser Copilot-State wieder nach `~/.copilot/` im temporären Home eingespielt.
+- Danach wird `config.json` separat geladen und um `/workspace` in `trusted_folders` ergänzt.
+
+Damit funktioniert `copilot --resume` auch über mehrere Sandbox-Runs hinweg deutlich zuverlässiger.
 
 Für Codex wird nicht nur `~/.codex/` gespiegelt, sondern zusätzlich auch XDG-State unter `~/.local/state/codex/`, weil die Resume-/History-Daten je nach CLI-Version nicht konsistent nur an einer Stelle liegen.
 

@@ -65,11 +65,13 @@ SANDBOX_HOME="$(mktemp -d "${XDG_RUNTIME_DIR:-/tmp}/agent-home.XXXXXX")"
 SETTINGS_ROOT="${SANDBOX_SETTINGS_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/agent-sandbox}"
 STATE_ROOT="${SANDBOX_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/agent-sandbox}"
 PERSIST_COPILOT_CONFIG="$SETTINGS_ROOT/copilot/config.json"
+PERSIST_COPILOT_HOME="$STATE_ROOT/copilot/home"
 PERSIST_CODEX_CONFIG="$SETTINGS_ROOT/codex/config.toml"
 PERSIST_CODEX_HOME="$STATE_ROOT/codex/home"
 PERSIST_CODEX_XDG_STATE="$STATE_ROOT/codex/xdg-state"
 mkdir -p \
   "$(dirname "$PERSIST_COPILOT_CONFIG")" \
+  "$PERSIST_COPILOT_HOME" \
   "$(dirname "$PERSIST_CODEX_CONFIG")" \
   "$PERSIST_CODEX_HOME" \
   "$PERSIST_CODEX_XDG_STATE"
@@ -97,7 +99,7 @@ sync_tree() {
 cleanup() {
   local rc=$?
 
-  # Persist only settings files; auth remains ephemeral and is re-seeded from host each run.
+  # Persist settings separately from session state; auth remains ephemeral and is re-seeded from host each run.
   if [[ -f "$SANDBOX_HOME/.copilot/config.json" ]]; then
     cp "$SANDBOX_HOME/.copilot/config.json" "$PERSIST_COPILOT_CONFIG" || true
   fi
@@ -105,9 +107,16 @@ cleanup() {
     cp "$SANDBOX_HOME/.codex/config.toml" "$PERSIST_CODEX_CONFIG" || true
   fi
   {
+    printf 'cleanup_copilot_home_exists=%s\n' "$([[ -d "$SANDBOX_HOME/.copilot" ]] && echo yes || echo no)"
     printf 'cleanup_codex_home_exists=%s\n' "$([[ -d "$SANDBOX_HOME/.codex" ]] && echo yes || echo no)"
     printf 'cleanup_codex_xdg_state_exists=%s\n' "$([[ -d "$SANDBOX_HOME/.local/state/codex" ]] && echo yes || echo no)"
   } >> "$LOGFILE" 2>/dev/null || true
+  if [[ -d "$SANDBOX_HOME/.copilot" ]]; then
+    sync_tree "$SANDBOX_HOME/.copilot" "$PERSIST_COPILOT_HOME" \
+      --exclude config.json \
+      --exclude tmp \
+      --exclude .tmp || true
+  fi
   if [[ -d "$SANDBOX_HOME/.codex" ]]; then
     sync_tree "$SANDBOX_HOME/.codex" "$PERSIST_CODEX_HOME" \
       --exclude auth.json \
@@ -140,6 +149,14 @@ mkdir -p \
 [[ -f "$HOME/.gitignore_global" ]] && cp "$HOME/.gitignore_global" "$SANDBOX_HOME/.gitignore_global"
 
 # GitHub Copilot CLI — pre-trust /workspace to skip the folder-trust prompt
+if [[ -d "$PERSIST_COPILOT_HOME" ]]; then
+  mkdir -p "$SANDBOX_HOME/.copilot"
+  sync_tree "$PERSIST_COPILOT_HOME" "$SANDBOX_HOME/.copilot" \
+    --exclude config.json \
+    --exclude tmp \
+    --exclude .tmp
+fi
+
 COPILOT_SOURCE_CONFIG=""
 [[ -f "$PERSIST_COPILOT_CONFIG" ]] && COPILOT_SOURCE_CONFIG="$PERSIST_COPILOT_CONFIG"
 [[ -z "$COPILOT_SOURCE_CONFIG" && -f "$HOME/.copilot/config.json" ]] && COPILOT_SOURCE_CONFIG="$HOME/.copilot/config.json"
