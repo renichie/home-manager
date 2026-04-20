@@ -203,9 +203,239 @@ hm_switch() {
 generate_password() { date +%s | sha256sum | base64 | head -c 32 ; echo; }
 
 git-prune-local-branches () {
-    # Delete branches whose upstream is gone
-    git branch -vv \
-        | awk '/: gone]/{print $1}' \
-        | grep -vE '^(main|master|develop)$' \
-        | xargs -r git branch -D
+    local confirmation_mode="all"
+    local filter_mode="all"
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --no-confirmation)
+                confirmation_mode="none"
+                ;;
+            --single)
+                confirmation_mode="single"
+                ;;
+            --local)
+                if [[ "$filter_mode" == "remote" ]]; then
+                    printf 'Options --local and --remote cannot be used together.\n' >&2
+                    return 1
+                fi
+                filter_mode="local"
+                ;;
+            --remote)
+                if [[ "$filter_mode" == "local" ]]; then
+                    printf 'Options --local and --remote cannot be used together.\n' >&2
+                    return 1
+                fi
+                filter_mode="remote"
+                ;;
+            -h|--help)
+                cat <<'EOF'
+Usage: git-prune-local-branches [--no-confirmation | --single] [--local | --remote]
+
+  --no-confirmation  Delete matching branches without asking for confirmation.
+  --single           Ask for confirmation for each branch individually.
+  --local            Only include local branches without any upstream configured.
+  --remote           Only include local branches whose upstream is gone.
+EOF
+                return 0
+                ;;
+            *)
+                printf 'Unknown option: %s\n' "$1" >&2
+                return 1
+                ;;
+        esac
+        shift
+    done
+
+    local use_color=0
+    if [[ -t 1 ]] && command -v tput >/dev/null 2>&1 && [[ "$(tput colors 2>/dev/null || echo 0)" -ge 8 ]]; then
+        use_color=1
+    fi
+
+    local reset="" red="" green="" yellow="" blue="" bold=""
+    if [[ $use_color -eq 1 ]]; then
+        reset="$(tput sgr0)"
+        red="$(tput setaf 1)"
+        green="$(tput setaf 2)"
+        yellow="$(tput setaf 3)"
+        blue="$(tput setaf 4)"
+        bold="$(tput bold)"
+    fi
+
+    local current_branch
+    current_branch="$(git branch --show-current 2>/dev/null)"
+
+    local candidates=()
+    local line branch sha rest upstream track age author subject
+    while IFS= read -r line; do
+        [[ -z "$line" ]] && continue
+
+        if [[ "$line" =~ ^\*?[[:space:]]*([^[:space:]]+)[[:space:]]+([0-9a-f]+)[[:space:]]+(.*)$ ]]; then
+            branch="${BASH_REMATCH[1]}"
+            sha="${BASH_REMATCH[2]}"
+            rest="${BASH_REMATCH[3]}"
+        else
+            continue
+        fi
+
+        if [[ "$branch" == "main" || "$branch" == "master" || "$branch" == "develop" || "$branch" == "$current_branch" ]]; then
+            continue
+        fi
+
+        upstream=""
+        track=""
+        if [[ "$rest" =~ ^\[([^]]+)\][[:space:]]*(.*)$ ]]; then
+            local upstream_info
+            upstream_info="${BASH_REMATCH[1]}"
+
+            if [[ "$upstream_info" == *": gone" ]]; then
+                upstream="${upstream_info%: gone}"
+                track="[gone]"
+            else
+                upstream="${upstream_info%%:*}"
+                [[ "$upstream" == "$upstream_info" ]] && upstream="$upstream_info"
+                track="[tracked]"
+            fi
+        fi
+
+        case "$filter_mode" in
+            all)
+                if [[ "$track" != "[gone]" && -n "$upstream" ]]; then
+                    continue
+                fi
+                ;;
+            local)
+                if [[ -n "$upstream" ]]; then
+                    continue
+                fi
+                ;;
+            remote)
+                if [[ "$track" != "[gone]" ]]; then
+                    continue
+                fi
+                ;;
+        esac
+
+        age="$(git log -1 --format='%cr' "$branch" 2>/dev/null)"
+        author="$(git log -1 --format='%an' "$branch" 2>/dev/null)"
+        subject="$(git log -1 --format='%s' "$branch" 2>/dev/null)"
+        candidates+=("${branch}|${upstream}|${track}|${age}|${author}|${subject}")
+    done < <(git branch -vv --no-color)
+
+    if [[ ${#candidates[@]} -eq 0 ]]; then
+        case "$filter_mode" in
+            all)
+                printf '%sNo local branches with gone or missing upstreams found.%s\n' "$green" "$reset"
+                ;;
+            local)
+                printf '%sNo local branches without upstreams found.%s\n' "$green" "$reset"
+                ;;
+            remote)
+                printf '%sNo local branches with gone upstreams found.%s\n' "$green" "$reset"
+                ;;
+        esac
+        return 0
+    fi
+
+    printf '%sBranches selected for deletion (%d):%s\n' "$bold" "${#candidates[@]}" "$reset"
+    local preview_entry preview_branch preview_upstream preview_track
+    for preview_entry in "${candidates[@]}"; do
+        IFS='|' read -r preview_branch preview_upstream preview_track _ <<< "$preview_entry"
+
+        if [[ "$preview_track" == "[gone]" ]]; then
+            printf '  %s- %s%s%s %s[gone]%s\n' "$red" "$blue" "$preview_branch" "$reset" "$red" "$reset"
+        else
+            printf '  %s- %s%s%s %s[no upstream]%s\n' "$yellow" "$blue" "$preview_branch" "$reset" "$yellow" "$reset"
+        fi
+    done
+
+    local answer
+    if [[ "$confirmation_mode" == "all" ]]; then
+        printf '%sDelete all listed branches? [y/N]: %s' "$yellow" "$reset"
+        read -r answer
+
+        case "$answer" in
+            y|Y|yes|YES)
+                ;;
+            *)
+                printf '%sAborted.%s\n' "$blue" "$reset"
+                return 0
+                ;;
+        esac
+    fi
+
+    local status
+    for entry in "${candidates[@]}"; do
+        IFS='|' read -r branch upstream track age author subject <<< "$entry"
+
+        if [[ "$track" == "[gone]" ]]; then
+            status="${red}[gone]${reset}"
+        elif [[ -z "$upstream" ]]; then
+            status="${yellow}[no upstream]${reset}"
+        else
+            status="${blue}${upstream}${reset}"
+        fi
+
+        printf '\n%sBranch:%s %s%s%s\n' "$bold" "$reset" "$blue" "$branch" "$reset"
+        if [[ -n "$upstream" ]]; then
+            printf '  Upstream: %s (%s)\n' "$upstream" "$status"
+        else
+            printf '  Upstream: %s\n' "$status"
+        fi
+        printf '  Last commit: %s\n' "$age"
+        printf '  Author: %s\n' "$author"
+        printf '  Subject: %s\n' "$subject"
+
+        if [[ "$confirmation_mode" == "single" ]]; then
+            printf '%sDelete this branch? [y/N]: %s' "$yellow" "$reset"
+            read -r answer
+
+            case "$answer" in
+                y|Y|yes|YES)
+                    ;;
+                *)
+                    printf '%sKept:%s %s\n' "$blue" "$reset" "$branch"
+                    continue
+                    ;;
+            esac
+        fi
+
+        if git branch -D "$branch"; then
+            printf '%sDeleted:%s %s\n' "$green" "$reset" "$branch"
+        else
+            printf '%sFailed to delete:%s %s\n' "$red" "$reset" "$branch"
+        fi
+    done
 }
+
+_git_prune_local_branches_completion() {
+    local cur
+    cur="${COMP_WORDS[COMP_CWORD]}"
+
+    local options=(
+        --no-confirmation
+        --single
+        --local
+        --remote
+        --help
+    )
+
+    local used word filtered=()
+    for word in "${options[@]}"; do
+        used=0
+        for ((i = 1; i < COMP_CWORD; i++)); do
+            if [[ "${COMP_WORDS[i]}" == "$word" ]]; then
+                used=1
+                break
+            fi
+        done
+
+        if [[ $used -eq 0 ]]; then
+            filtered+=("$word")
+        fi
+    done
+
+    COMPREPLY=( $(compgen -W "${filtered[*]}" -- "$cur") )
+}
+
+complete -F _git_prune_local_branches_completion git-prune-local-branches
