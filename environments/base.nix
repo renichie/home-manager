@@ -42,6 +42,7 @@ in
 
     ### Git ###
     git
+    difftastic
     git-lfs
     git-credential-manager
 

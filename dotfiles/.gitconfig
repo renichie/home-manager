@@ -24,6 +24,10 @@
 	glo2 = log2
 	ogl2 = log2
 	lgo2 = log2
+	dt = diff
+	dtc = diff --cached
+	ds = -c diff.external=difft show --ext-diff
+	dl = -c diff.external=difft log -p --ext-diff
 
 [core]
 	editor = nvim
@@ -46,3 +50,6 @@
 
 [push]
     autoSetupRemote = true
+
+[diff]
+	external = difft

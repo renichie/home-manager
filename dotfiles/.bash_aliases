@@ -74,4 +74,3 @@ alias sdkui='cd ~/projects/sdk-core/sdkui'
 alias docs='cd ~/projects/sdk/sdk-docs'
 alias vault='cd ~/documents/obsidian-vaults/work-main'
 alias vault-priv='cd ~/.sync/share-documentations/main'
-
