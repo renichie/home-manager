@@ -20,6 +20,8 @@ alias gfa='git fetch --all'
 alias glg='git lg1 --all'
 alias gdc='git diff --cached'
 gitall() {
+  local max_repo_depth="2"
+
   case "${1:-}" in
     -h|--help|"")
       cat <<'EOF'
@@ -27,13 +29,61 @@ gitall - führt einen beliebigen git-Befehl in allen Git-Repositories unterhalb
 des aktuellen Verzeichnisses aus.
 
 Verwendung:
-  gitall <git-subcommand> [args...]
+  gitall [--depth N | --depth=N] <git-subcommand> [args...]
+
+Optionen:
+  --depth N    Maximale Repo-Tiefe relativ zum aktuellen Verzeichnis.
+  --depth=N    Standard ist 2. Beispiel: 0 = nur aktuelles Repo, 1 = direkte Unterordner.
 EOF
       [ -z "${1:-}" ] && return 1 || return 0
       ;;
   esac
 
-  find . -type d -name .git -prune | while read -r gitdir; do
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --depth)
+        if [[ -z "${2:-}" ]]; then
+          printf 'Option --depth requires a value.\n' >&2
+          return 1
+        fi
+        max_repo_depth="$2"
+        shift 2
+        ;;
+      --depth=*)
+        max_repo_depth="${1#--depth=}"
+        shift
+        ;;
+      --)
+        shift
+        break
+        ;;
+      -*)
+        printf 'Unknown option: %s\n' "$1" >&2
+        return 1
+        ;;
+      *)
+        break
+        ;;
+    esac
+  done
+
+  if [[ -z "${1:-}" ]]; then
+    printf 'Usage: gitall [--depth N | --depth=N] <git-subcommand> [args...]\n' >&2
+    return 1
+  fi
+
+  if [[ -n "$max_repo_depth" && ! "$max_repo_depth" =~ ^[0-9]+$ ]]; then
+    printf 'Option --depth must be a non-negative integer.\n' >&2
+    return 1
+  fi
+
+  local -a find_cmd=(find .)
+  if [[ -n "$max_repo_depth" ]]; then
+    find_cmd+=(-maxdepth "$((max_repo_depth + 1))")
+  fi
+  find_cmd+=(-type d -name .git -prune)
+
+  "${find_cmd[@]}" | while read -r gitdir; do
     repo="${gitdir%/.git}"
     printf '===== %s =====\n' "$repo"
     git -C "$repo" --no-pager -c color.ui=always "$@"
