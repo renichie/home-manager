@@ -110,7 +110,7 @@ cleanup() {
     printf 'cleanup_copilot_home_exists=%s\n' "$([[ -d "$SANDBOX_HOME/.copilot" ]] && echo yes || echo no)"
     printf 'cleanup_codex_home_exists=%s\n' "$([[ -d "$SANDBOX_HOME/.codex" ]] && echo yes || echo no)"
     printf 'cleanup_codex_xdg_state_exists=%s\n' "$([[ -d "$SANDBOX_HOME/.local/state/codex" ]] && echo yes || echo no)"
-  } >> "$LOGFILE" 2>/dev/null || true
+  } >> "${LOGFILE:-/dev/null}" 2>/dev/null || true
   if [[ -d "$SANDBOX_HOME/.copilot" ]]; then
     sync_tree "$SANDBOX_HOME/.copilot" "$PERSIST_COPILOT_HOME" \
       --exclude config.json \
@@ -158,16 +158,38 @@ if [[ -d "$PERSIST_COPILOT_HOME" ]]; then
 fi
 
 COPILOT_SOURCE_CONFIG=""
-[[ -f "$PERSIST_COPILOT_CONFIG" ]] && COPILOT_SOURCE_CONFIG="$PERSIST_COPILOT_CONFIG"
+# Prefer persisted config if it exists and is non-empty
+[[ -f "$PERSIST_COPILOT_CONFIG" && -s "$PERSIST_COPILOT_CONFIG" ]] && COPILOT_SOURCE_CONFIG="$PERSIST_COPILOT_CONFIG"
+# Fall back to host config
 [[ -z "$COPILOT_SOURCE_CONFIG" && -f "$HOME/.copilot/config.json" ]] && COPILOT_SOURCE_CONFIG="$HOME/.copilot/config.json"
 if [[ -n "$COPILOT_SOURCE_CONFIG" ]]; then
   mkdir -p "$SANDBOX_HOME/.copilot"
   if command -v jq &>/dev/null; then
-    jq '.trusted_folders = ([.trusted_folders // []] | flatten | . + ["/workspace"] | unique)' \
-      "$COPILOT_SOURCE_CONFIG" > "$SANDBOX_HOME/.copilot/config.json"
+    # Strip JS-style comments (lines starting with //) before parsing
+    grep -v '^[[:space:]]*//' "$COPILOT_SOURCE_CONFIG" | \
+      jq '.trustedFolders = ([.trustedFolders // [], .trusted_folders // []] | flatten | . + ["/workspace"] | unique) | del(.trusted_folders)' \
+      > "$SANDBOX_HOME/.copilot/config.json"
   else
     cp "$COPILOT_SOURCE_CONFIG" "$SANDBOX_HOME/.copilot/config.json"
   fi
+fi
+
+# Copy permissions config if it exists (tool approvals)
+if [[ -f "$HOME/.copilot/permissions-config.json" ]]; then
+  mkdir -p "$SANDBOX_HOME/.copilot"
+  cp "$HOME/.copilot/permissions-config.json" "$SANDBOX_HOME/.copilot/permissions-config.json"
+fi
+
+# Copy settings if they exist
+if [[ -f "$HOME/.copilot/settings.json" ]]; then
+  mkdir -p "$SANDBOX_HOME/.copilot"
+  cp "$HOME/.copilot/settings.json" "$SANDBOX_HOME/.copilot/settings.json"
+fi
+
+# Copy GNOME keyring for authentication tokens (read-only to prevent corruption)
+if [[ -d "$HOME/.local/share/keyrings" ]]; then
+  mkdir -p "$SANDBOX_HOME/.local/share/keyrings"
+  cp -r "$HOME/.local/share/keyrings"/* "$SANDBOX_HOME/.local/share/keyrings/" 2>/dev/null || true
 fi
 
 # Codex CLI — auth + pre-trust /workspace in config.toml
