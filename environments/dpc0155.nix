@@ -56,6 +56,7 @@ in
     gimp
     xfce.thunar
     pandoc
+    uv
     peek
     ydotool
   ];
