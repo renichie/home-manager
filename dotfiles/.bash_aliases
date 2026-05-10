@@ -111,7 +111,7 @@ sbx()              { ~/.local/bin/agent-sandbox.sh "$PWD" "$@"; }
 sbx-copilot()      { ~/.local/bin/agent-sandbox.sh "$PWD" copilot "$@"; }
 sbx-copilot-yolo() { ~/.local/bin/agent-sandbox.sh "$PWD" copilot --allow-all "$@"; }
 sbx-codex()        { ~/.local/bin/agent-sandbox.sh "$PWD" codex "$@"; }
-sbx-codex-yolo()   { ~/.local/bin/agent-sandbox.sh "$PWD" codex --full-auto "$@"; }
+sbx-codex-yolo()   { ~/.local/bin/agent-sandbox.sh "$PWD" codex --dangerously-bypass-approvals-and-sandbox "$@"; }
 sbx-nonet()        { NO_NET=1 ~/.local/bin/agent-sandbox.sh "$PWD" "$@"; }
 copilot()          { sbx-copilot-yolo "$@"; }
 codex()            { sbx-codex-yolo "$@"; }

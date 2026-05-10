@@ -174,14 +174,15 @@ if [[ -n "$COPILOT_SOURCE_CONFIG" ]]; then
   fi
 fi
 
-# Copy permissions config if it exists (tool approvals)
-if [[ -f "$HOME/.copilot/permissions-config.json" ]]; then
+# Copy permissions config if it exists (tool approvals). Persisted sandbox state wins
+# so approvals changed inside the sandbox survive the next run.
+if [[ ! -s "$SANDBOX_HOME/.copilot/permissions-config.json" && -f "$HOME/.copilot/permissions-config.json" ]]; then
   mkdir -p "$SANDBOX_HOME/.copilot"
   cp "$HOME/.copilot/permissions-config.json" "$SANDBOX_HOME/.copilot/permissions-config.json"
 fi
 
-# Copy settings if they exist
-if [[ -f "$HOME/.copilot/settings.json" ]]; then
+# Copy settings if they exist. Do not overwrite persisted sandbox login metadata.
+if [[ ! -s "$SANDBOX_HOME/.copilot/settings.json" && -f "$HOME/.copilot/settings.json" ]]; then
   mkdir -p "$SANDBOX_HOME/.copilot"
   cp "$HOME/.copilot/settings.json" "$SANDBOX_HOME/.copilot/settings.json"
 fi
@@ -408,6 +409,7 @@ printf '\n' >&2
   --setenv XDG_CACHE_HOME  /home/user/.cache \
   --setenv XDG_STATE_HOME  /home/user/.local/state \
   --setenv XDG_DATA_HOME   /home/user/.local/share \
+  --setenv COPILOT_AUTO_UPDATE "${COPILOT_AUTO_UPDATE:-false}" \
   --setenv PATH            "$SANDBOX_PATH" \
   --setenv TERM            "${TERM:-xterm-256color}" \
   --setenv COLORTERM       "${COLORTERM:-truecolor}" \

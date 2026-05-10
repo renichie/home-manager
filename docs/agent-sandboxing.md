@@ -138,6 +138,8 @@ Praktisch heißt das:
 - Inhalte aus `~/.copilot/` außer `config.json` werden nach `~/.local/state/agent-sandbox/copilot/home/` persistiert.
 - Beim nächsten Sandbox-Start wird dieser Copilot-State wieder nach `~/.copilot/` im temporären Home eingespielt.
 - Danach wird `config.json` separat geladen und um `/workspace` in `trusted_folders` ergänzt.
+- Host-Dateien wie `~/.copilot/settings.json` und `permissions-config.json` dienen nur als Initial-Fallback. Sobald Sandbox-State existiert, wird er nicht mehr durch den Host überschrieben, damit ein `copilot login` im Sandbox nicht beim nächsten Start verloren geht.
+- Copilot Auto-Update ist im Sandbox standardmäßig deaktiviert (`COPILOT_AUTO_UPDATE=false`), weil die globale Installation read-only eingebunden ist. Updates sollten außerhalb des Sandbox laufen.
 
 Damit funktioniert `copilot --resume` auch über mehrere Sandbox-Runs hinweg deutlich zuverlässiger.
 
