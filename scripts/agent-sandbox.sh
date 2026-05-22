@@ -312,17 +312,60 @@ SANDBOX_PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 [[ -d "$HOME/.nix-profile/bin" ]] && SANDBOX_PATH="/home/user/.nix-profile/bin:$SANDBOX_PATH"
 [[ -d /snap/bin ]]                && SANDBOX_PATH="$SANDBOX_PATH:/snap/bin"
 
-# D-Bus session socket — needed for keyring access (e.g. copilot token via libsecret).
-# Only bind it when the socket actually exists; skip silently otherwise.
-DBUS_ARGS=()
-if [[ -n "${XDG_RUNTIME_DIR:-}" && -S "${XDG_RUNTIME_DIR}/bus" ]]; then
-  DBUS_ARGS+=(--dir "${XDG_RUNTIME_DIR}")
-  DBUS_ARGS+=(--bind "${XDG_RUNTIME_DIR}/bus" "${XDG_RUNTIME_DIR}/bus")
-  DBUS_ARGS+=(--setenv XDG_RUNTIME_DIR "${XDG_RUNTIME_DIR}")
-  DBUS_ARGS+=(--setenv DBUS_SESSION_BUS_ADDRESS "${DBUS_SESSION_BUS_ADDRESS:-unix:path=${XDG_RUNTIME_DIR}/bus}")
-fi
+# GUI/session runtime forwarding. Keep this selective: only session sockets and
+# auth that agents need for clipboard, keyring and similar desktop integrations.
+SESSION_RUNTIME_ARGS=()
+SESSION_ENV_ARGS=()
+SESSION_DIRS_CREATED=":"
+
+ensure_runtime_dir() {
+  local dir="$1"
+  [[ -n "$dir" ]] || return 0
+  [[ "$SESSION_DIRS_CREATED" == *":$dir:"* ]] && return 0
+  SESSION_RUNTIME_ARGS+=(--dir "$dir")
+  SESSION_DIRS_CREATED+="${dir}:"
+}
+
+# D-Bus session socket — needed for keyring access (e.g. copilot token via
+# libsecret). Only bind it when the socket actually exists; skip silently
+# otherwise.
 DBUS_ENABLED="no"
-[[ ${#DBUS_ARGS[@]} -gt 0 ]] && DBUS_ENABLED="yes"
+if [[ -n "${XDG_RUNTIME_DIR:-}" && -S "${XDG_RUNTIME_DIR}/bus" ]]; then
+  ensure_runtime_dir "${XDG_RUNTIME_DIR}"
+  SESSION_RUNTIME_ARGS+=(--bind "${XDG_RUNTIME_DIR}/bus" "${XDG_RUNTIME_DIR}/bus")
+  SESSION_ENV_ARGS+=(--setenv XDG_RUNTIME_DIR "${XDG_RUNTIME_DIR}")
+  SESSION_ENV_ARGS+=(--setenv DBUS_SESSION_BUS_ADDRESS "${DBUS_SESSION_BUS_ADDRESS:-unix:path=${XDG_RUNTIME_DIR}/bus}")
+  DBUS_ENABLED="yes"
+fi
+
+# Wayland clipboard/app access uses the compositor socket in XDG_RUNTIME_DIR.
+WAYLAND_ENABLED="no"
+if [[ -n "${XDG_RUNTIME_DIR:-}" && -n "${WAYLAND_DISPLAY:-}" && -S "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}" ]]; then
+  ensure_runtime_dir "${XDG_RUNTIME_DIR}"
+  SESSION_RUNTIME_ARGS+=(--bind "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}" "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}")
+  SESSION_ENV_ARGS+=(--setenv XDG_RUNTIME_DIR "${XDG_RUNTIME_DIR}")
+  SESSION_ENV_ARGS+=(--setenv WAYLAND_DISPLAY "${WAYLAND_DISPLAY}")
+  WAYLAND_ENABLED="yes"
+fi
+
+# X11 clipboard access needs the display socket and an auth cookie. Bind both
+# only for local unix-domain displays.
+X11_ENABLED="no"
+if [[ "${DISPLAY:-}" =~ ^:([0-9]+)(\.[0-9]+)?$ ]] && [[ -d /tmp/.X11-unix ]]; then
+  display_num="${BASH_REMATCH[1]}"
+  display_socket="/tmp/.X11-unix/X${display_num}"
+  if [[ -S "$display_socket" ]]; then
+    ensure_runtime_dir /tmp/.X11-unix
+    SESSION_RUNTIME_ARGS+=(--ro-bind /tmp/.X11-unix /tmp/.X11-unix)
+    SESSION_ENV_ARGS+=(--setenv DISPLAY "${DISPLAY}")
+    X11_ENABLED="yes"
+  fi
+fi
+
+if [[ "$X11_ENABLED" == "yes" && -n "${XAUTHORITY:-}" && -f "${XAUTHORITY}" ]]; then
+  SESSION_RUNTIME_ARGS+=(--ro-bind "${XAUTHORITY}" /tmp/agent-sandbox.Xauthority)
+  SESSION_ENV_ARGS+=(--setenv XAUTHORITY /tmp/agent-sandbox.Xauthority)
+fi
 
 # ---------------------------------------------------------------------------
 # Session logging
@@ -337,6 +380,8 @@ LOGFILE="$LOGDIR/$(date +%Y%m%d-%H%M%S)-$$.log"
   printf 'project=%q\n' "$PROJECT"
   printf 'no_net=%q\n'  "$NO_NET"
   printf 'dbus=%s\n'    "$DBUS_ENABLED"
+  printf 'wayland=%s\n' "$WAYLAND_ENABLED"
+  printf 'x11=%s\n'     "$X11_ENABLED"
   printf 'settings_root=%q\n' "$SETTINGS_ROOT"
   printf 'state_root=%q\n' "$STATE_ROOT"
   printf 'cmd='
@@ -363,9 +408,11 @@ fi
 printf '[agent-sandbox] SANDBOXED RUN active\n' >&2
 printf '[agent-sandbox] project=%s\n' "$PROJECT" >&2
 printf '[agent-sandbox] workspace=/workspace home=/home/user (ephemeral)\n' >&2
-printf '[agent-sandbox] network=%s dbus=%s trace=%s\n' \
+printf '[agent-sandbox] network=%s dbus=%s wayland=%s x11=%s trace=%s\n' \
   "$([[ "$NO_NET" == "1" ]] && echo off || echo on)" \
   "$DBUS_ENABLED" \
+  "$WAYLAND_ENABLED" \
+  "$X11_ENABLED" \
   "$TRACE_ENABLED" >&2
 printf '[agent-sandbox] settings_root=%s\n' "$SETTINGS_ROOT" >&2
 printf '[agent-sandbox] state_root=%s\n' "$STATE_ROOT" >&2
@@ -388,7 +435,7 @@ printf '\n' >&2
   --dev  /dev \
   --tmpfs /tmp \
   --tmpfs /run \
-  "${DBUS_ARGS[@]}" \
+  "${SESSION_RUNTIME_ARGS[@]}" \
   \
   "${STD_BINDS[@]}" \
   "${ETC_ARGS[@]}" \
@@ -413,5 +460,6 @@ printf '\n' >&2
   --setenv PATH            "$SANDBOX_PATH" \
   --setenv TERM            "${TERM:-xterm-256color}" \
   --setenv COLORTERM       "${COLORTERM:-truecolor}" \
+  "${SESSION_ENV_ARGS[@]}" \
   \
   "${CMD[@]}"

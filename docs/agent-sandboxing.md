@@ -60,6 +60,7 @@ Kurz gesagt funktioniert es so:
 - `agent-sandbox.sh` startet `bwrap` mit eigenen User/PID/IPC/UTS-Namespaces.
 - Das Projekt wird als `/workspace` read-write gemountet; `.git/` wird standardmäßig read-only übermountet. Systempfade (`/usr`, `/nix`, Teile von `/etc`) sind ebenfalls nur read-only.
 - Der Agent läuft mit einem temporären `/home/user`; nach Ende wird dieses gelöscht (außer persistente Settings unter `~/.config/agent-sandbox/`).
+- Lokale Desktop-Session-Sockets werden gezielt durchgereicht: D-Bus für Keyring-Zugriff sowie Wayland-/X11-Clipboard nur dann, wenn die zugehörigen lokalen Sockets tatsächlich existieren.
 
 Das Scratch-Home wird mit `mktemp -d` erstellt. Beim Exit werden temporäre Daten gelöscht; Agent-Settings werden separat persistent gespeichert. Es enthält nur:
 
