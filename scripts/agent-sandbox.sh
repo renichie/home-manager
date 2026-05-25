@@ -69,12 +69,16 @@ PERSIST_COPILOT_HOME="$STATE_ROOT/copilot/home"
 PERSIST_CODEX_CONFIG="$SETTINGS_ROOT/codex/config.toml"
 PERSIST_CODEX_HOME="$STATE_ROOT/codex/home"
 PERSIST_CODEX_XDG_STATE="$STATE_ROOT/codex/xdg-state"
+PERSIST_CLAUDE_SETTINGS="$SETTINGS_ROOT/claude/settings.json"
+PERSIST_CLAUDE_HOME="$STATE_ROOT/claude/home"
 mkdir -p \
   "$(dirname "$PERSIST_COPILOT_CONFIG")" \
   "$PERSIST_COPILOT_HOME" \
   "$(dirname "$PERSIST_CODEX_CONFIG")" \
   "$PERSIST_CODEX_HOME" \
-  "$PERSIST_CODEX_XDG_STATE"
+  "$PERSIST_CODEX_XDG_STATE" \
+  "$(dirname "$PERSIST_CLAUDE_SETTINGS")" \
+  "$PERSIST_CLAUDE_HOME"
 
 sync_tree() {
   local src="$1"
@@ -106,10 +110,14 @@ cleanup() {
   if [[ -f "$SANDBOX_HOME/.codex/config.toml" ]]; then
     cp "$SANDBOX_HOME/.codex/config.toml" "$PERSIST_CODEX_CONFIG" || true
   fi
+  if [[ -f "$SANDBOX_HOME/.claude/settings.json" ]]; then
+    cp "$SANDBOX_HOME/.claude/settings.json" "$PERSIST_CLAUDE_SETTINGS" || true
+  fi
   {
     printf 'cleanup_copilot_home_exists=%s\n' "$([[ -d "$SANDBOX_HOME/.copilot" ]] && echo yes || echo no)"
     printf 'cleanup_codex_home_exists=%s\n' "$([[ -d "$SANDBOX_HOME/.codex" ]] && echo yes || echo no)"
     printf 'cleanup_codex_xdg_state_exists=%s\n' "$([[ -d "$SANDBOX_HOME/.local/state/codex" ]] && echo yes || echo no)"
+    printf 'cleanup_claude_home_exists=%s\n' "$([[ -d "$SANDBOX_HOME/.claude" ]] && echo yes || echo no)"
   } >> "${LOGFILE:-/dev/null}" 2>/dev/null || true
   if [[ -d "$SANDBOX_HOME/.copilot" ]]; then
     sync_tree "$SANDBOX_HOME/.copilot" "$PERSIST_COPILOT_HOME" \
@@ -126,6 +134,13 @@ cleanup() {
   fi
   if [[ -d "$SANDBOX_HOME/.local/state/codex" ]]; then
     sync_tree "$SANDBOX_HOME/.local/state/codex" "$PERSIST_CODEX_XDG_STATE" || true
+  fi
+  if [[ -d "$SANDBOX_HOME/.claude" ]]; then
+    sync_tree "$SANDBOX_HOME/.claude" "$PERSIST_CLAUDE_HOME" \
+      --exclude credentials.json \
+      --exclude settings.json \
+      --exclude tmp \
+      --exclude .tmp || true
   fi
 
   rm -rf "$SANDBOX_HOME"
@@ -223,6 +238,34 @@ fi
 if [[ -f "$SANDBOX_HOME/.codex/config.toml" ]] && ! grep -q '"/workspace"' "$SANDBOX_HOME/.codex/config.toml"; then
   printf '\n[projects."/workspace"]\ntrust_level = "trusted"\n' \
     >> "$SANDBOX_HOME/.codex/config.toml"
+fi
+
+# Claude Code CLI — auth + settings + pre-trust /workspace
+if [[ -f "$HOME/.claude/credentials.json" ]]; then
+  mkdir -p "$SANDBOX_HOME/.claude"
+  cp "$HOME/.claude/credentials.json" "$SANDBOX_HOME/.claude/credentials.json"
+fi
+
+if [[ -d "$PERSIST_CLAUDE_HOME" ]]; then
+  mkdir -p "$SANDBOX_HOME/.claude"
+  sync_tree "$PERSIST_CLAUDE_HOME" "$SANDBOX_HOME/.claude" \
+    --exclude credentials.json \
+    --exclude settings.json \
+    --exclude tmp \
+    --exclude .tmp
+fi
+
+CLAUDE_SOURCE_SETTINGS=""
+[[ -f "$PERSIST_CLAUDE_SETTINGS" && -s "$PERSIST_CLAUDE_SETTINGS" ]] && CLAUDE_SOURCE_SETTINGS="$PERSIST_CLAUDE_SETTINGS"
+[[ -z "$CLAUDE_SOURCE_SETTINGS" && -f "$HOME/.claude/settings.json" ]] && CLAUDE_SOURCE_SETTINGS="$HOME/.claude/settings.json"
+if [[ -n "$CLAUDE_SOURCE_SETTINGS" ]]; then
+  mkdir -p "$SANDBOX_HOME/.claude"
+  if command -v jq &>/dev/null; then
+    jq '.allowedTools = ((.allowedTools // []) | . + ["Bash", "Edit", "Write"] | unique) | .trustedDirectories = ((.trustedDirectories // []) | . + ["/workspace"] | unique)' \
+      "$CLAUDE_SOURCE_SETTINGS" > "$SANDBOX_HOME/.claude/settings.json"
+  else
+    cp "$CLAUDE_SOURCE_SETTINGS" "$SANDBOX_HOME/.claude/settings.json"
+  fi
 fi
 
 # ---------------------------------------------------------------------------

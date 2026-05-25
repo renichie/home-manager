@@ -48,7 +48,7 @@ Der Sandbox-Ansatz hier setzt auf **defense in depth** für den normalen Dev-Wor
 │  │  /usr, /nix  →  Host (ro)                    │  │
 │  │  /etc/...    →  Host (ro, minimaler Subset)  │  │
 │  │                                               │  │
-│  │  copilot / codex                              │  │
+│  │  copilot / codex / claude                      │  │
 │  └───────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────┘
 ```
@@ -65,7 +65,7 @@ Kurz gesagt funktioniert es so:
 Das Scratch-Home wird mit `mktemp -d` erstellt. Beim Exit werden temporäre Daten gelöscht; Agent-Settings werden separat persistent gespeichert. Es enthält nur:
 
 - `.gitconfig` und `.gitignore_global` (nicht-sensitiv)
-- Genau die benötigten Agent-Dateien (Copilot: `~/.copilot/config.json`, Codex: `~/.codex/auth.json` + `~/.codex/config.toml`)
+- Genau die benötigten Agent-Dateien (Copilot: `~/.copilot/config.json`, Codex: `~/.codex/auth.json` + `~/.codex/config.toml`, Claude: `~/.claude/credentials.json` + `~/.claude/settings.json`)
 - Eine modifizierte Config mit `/workspace` als vertrauenswürdigem Ordner (damit der Trust-Dialog nicht bei jedem Start erscheint)
 
 Settings und lokaler Session-State aus Sandbox-Sessions werden nach `~/.config/agent-sandbox/` bzw. `~/.local/state/agent-sandbox/` synchronisiert und beim nächsten Start wieder geladen.
@@ -100,13 +100,17 @@ Nach `hm_switch` stehen folgende Shell-Funktionen zur Verfügung:
 ```bash
 copilot                # Default: Sandbox + --allow-all
 codex                  # Default: Sandbox + --full-auto, aber .git/ read-only
+claude                 # Default: Sandbox + --dangerously-skip-permissions
 copilot-vanilla        # Host-Copilot ohne Sandbox
 codex-vanilla          # Host-Codex ohne Sandbox
+claude-vanilla         # Host-Claude ohne Sandbox
 sbx                    # Sandbox für $PWD, interaktive Bash
 sbx-copilot            # Copilot CLI im Sandbox
 sbx-copilot-yolo       # Copilot mit --allow-all (kein Confirmation-Prompt)
 sbx-codex              # Codex CLI im Sandbox
 sbx-codex-yolo         # Codex mit --full-auto
+sbx-claude             # Claude CLI im Sandbox
+sbx-claude-yolo        # Claude mit --dangerously-skip-permissions
 sbx-nonet              # Sandbox ohne Netzwerkzugriff
 ```
 
@@ -117,8 +121,10 @@ Argumente werden durchgereicht:
 ```bash
 copilot --resume               # Copilot-Session fortsetzen (sandboxed yolo)
 codex --prompt "..."           # Direkt einen Prompt übergeben (sandboxed yolo)
+claude --resume                # Claude-Session fortsetzen (sandboxed yolo)
 copilot-vanilla --resume       # Host-Copilot explizit ohne Sandbox
 codex-vanilla --prompt "..."   # Host-Codex explizit ohne Sandbox
+claude-vanilla --resume        # Host-Claude explizit ohne Sandbox
 sbx -n codex                   # Codex ohne Netz (explizit)
 ```
 
@@ -127,9 +133,11 @@ Persistente Settings und lokaler Agent-State:
 ```bash
 ~/.config/agent-sandbox/codex/config.toml
 ~/.config/agent-sandbox/copilot/config.json
+~/.config/agent-sandbox/claude/settings.json
 ~/.local/state/agent-sandbox/copilot/home/
 ~/.local/state/agent-sandbox/codex/home/
 ~/.local/state/agent-sandbox/codex/xdg-state/
+~/.local/state/agent-sandbox/claude/home/
 ```
 
 Für Copilot wird neben `config.json` auch der restliche Inhalt von `~/.copilot/` in einen separaten State-Pfad gespiegelt. Damit bleiben lokale Sessions, Resume-Metadaten, Logs und andere CLI-Artefakte über mehrere Sandbox-Runs hinweg erhalten, ohne die modifizierte `config.json` mit dem Trust-Eintrag mit dem übrigen State zu vermischen.
@@ -155,6 +163,14 @@ Praktisch heißt das:
 Damit funktioniert mindestens `codex resume --last` auch über mehrere Sandbox-Runs hinweg.
 
 Der interaktive Resume-Picker kann je nach Codex-Version trotzdem unvollständig sein, obwohl die Session-Dateien bereits vorhanden sind. In dem Fall ist `codex resume --last` der zuverlässigere Weg.
+
+Für Claude Code wird `~/.claude/` nach dem gleichen Muster behandelt:
+
+- `credentials.json` wird bei jedem Start frisch vom Host geseeded (ephemeral, nicht persistiert).
+- `settings.json` wird persistent gespeichert und um `/workspace` in `trustedDirectories` sowie Standard-Tool-Permissions ergänzt.
+- Restlicher State (Sessions, Logs, Projects) wird nach `~/.local/state/agent-sandbox/claude/home/` persistiert.
+
+Damit funktioniert `claude --resume` über mehrere Sandbox-Runs hinweg.
 
 Extra Bind-Mounts für Sonderfälle:
 
