@@ -67,6 +67,12 @@ in
     ripgrep
     ripgrep-all
     glow # markdown renderer
+    mdformat
+
+    ### DIAGRAMS ###
+    graphviz
+    jdk
+    plantuml
 
     ### UI ###
     redshift
@@ -141,6 +147,7 @@ in
 
   home.sessionVariables = {
     EDITOR = "nvim";
+    GRAPHVIZ_DOT = "${pkgs.graphviz}/bin/dot";
   };
 
   fonts.fontconfig.enable = true;
