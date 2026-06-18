@@ -60,6 +60,7 @@ in
     ### UTILITY ###
     fzf
     xsel
+    wl-clipboard
     vlc
     keepassxc
     obsidianPackage
@@ -106,6 +107,7 @@ in
     ".tmux.conf".source = lib.mkForce "${dotfilesDir}/.tmux.conf";
     ".gitconfig".source = "${dotfilesDir}/.gitconfig";
     ".gitignore_global".source = "${dotfilesDir}/.gitignore_global";
+    ".lesskey".source = "${dotfilesDir}/.lesskey";
 
     # Setting oh-my-posh theme
     #".poshthemes/theme.omp.json".source = lib.mkDefault "${poshThemesDir}/nightowl.omp.json";

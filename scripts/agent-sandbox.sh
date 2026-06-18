@@ -382,12 +382,15 @@ if [[ -n "${XDG_RUNTIME_DIR:-}" && -S "${XDG_RUNTIME_DIR}/bus" ]]; then
 fi
 
 # Wayland clipboard/app access uses the compositor socket in XDG_RUNTIME_DIR.
+# /dev/shm is shared with the host so image data can be transferred via
+# the wl_shm protocol (shm_open path used by wl-paste and Wayland clients).
 WAYLAND_ENABLED="no"
 if [[ -n "${XDG_RUNTIME_DIR:-}" && -n "${WAYLAND_DISPLAY:-}" && -S "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}" ]]; then
   ensure_runtime_dir "${XDG_RUNTIME_DIR}"
   SESSION_RUNTIME_ARGS+=(--bind "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}" "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}")
   SESSION_ENV_ARGS+=(--setenv XDG_RUNTIME_DIR "${XDG_RUNTIME_DIR}")
   SESSION_ENV_ARGS+=(--setenv WAYLAND_DISPLAY "${WAYLAND_DISPLAY}")
+  [[ -d /dev/shm ]] && SESSION_RUNTIME_ARGS+=(--bind /dev/shm /dev/shm)
   WAYLAND_ENABLED="yes"
 fi
 
