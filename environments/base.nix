@@ -96,6 +96,13 @@ in
     ".bashrc".source = lib.mkForce "${dotfilesDir}/.bashrc";
     ".bash_aliases".source = lib.mkForce "${dotfilesDir}/.bash_aliases";
 
+    # bash-preexec: required by atuin on bash to record commands + cwd.
+    # Must be sourced before `atuin init bash` in .bashrc (directory search
+    # depends on this hook firing). Exposed at a stable path so the static
+    # .bashrc can source it without referencing a nix store path.
+    ".local/share/bash-preexec.sh".source =
+      "${pkgs.bash-preexec}/share/bash/bash-preexec.sh";
+
     # AI agent sandbox wrapper (bubblewrap-based)
     ".local/bin/agent-sandbox.sh" = {
       source = "${scriptfilesDir}/agent-sandbox.sh";

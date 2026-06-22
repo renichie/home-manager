@@ -42,6 +42,9 @@ parse_git_branch() {
 
 eval "$(oh-my-posh init bash --config=$HOME/.poshthemes/theme.omp.json)"
 
+# bash-preexec must be sourced before atuin init so atuin can hook preexec
+# and record each command with its cwd (required for directory search).
+[[ -f ~/.local/share/bash-preexec.sh ]] && source ~/.local/share/bash-preexec.sh
 eval "$(atuin init bash --disable-up-arrow)"
 eval "$(atuin gen-completions --shell bash)"
 
