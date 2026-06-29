@@ -6,6 +6,57 @@ let
   poshThemesDir = ../themes/posh;
   scriptfilesDir = ../scripts;
   vimNixPlugin = pkgs.vimPlugins.vim-nix;
+
+  obsyncPackage = pkgs.writers.writePython3Bin "obsync"
+    { flakeIgnore = [ "E265" "E501" ]; }
+    (builtins.readFile "${scriptfilesDir}/obsync.py");
+
+  obsyncCompletion = ''
+    _obsync_completions() {
+      local cur prev words cword
+      _init_completion || return
+
+      local features="vim theme appearance snippets hotkeys core-plugins community-plugins daily-notes templates graph app-settings bookmarks canvas backlink page-preview command-palette all sensible"
+      local opts="--list --interactive --dry-run -l -i -n"
+
+      case "$prev" in
+        --list|-l)
+          return
+          ;;
+      esac
+
+      if [[ "$cur" == -* ]]; then
+        COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
+        return
+      fi
+
+      # Count positional (non-option) args already present
+      local positionals=0
+      local i
+      for ((i=1; i<cword; i++)); do
+        local w="''${words[i]}"
+        case "$w" in
+          --list|-l|--interactive|-i|--dry-run|-n) ;;
+          -*) ;;
+          *) ((positionals++)) ;;
+        esac
+      done
+
+      case $positionals in
+        0|1)
+          # source / target: complete directories
+          _filedir -d
+          ;;
+        *)
+          # feature names (allow repeating)
+          COMPREPLY=( $(compgen -W "$features" -- "$cur") )
+          ;;
+      esac
+    }
+
+    complete -F _obsync_completions obsync
+  '';
+
   obsidianPackage =
     if ubuntuElectron == null then
       pkgs.obsidian
@@ -56,6 +107,8 @@ in
 
     ### BACKUP ###
     syncthing
+
+    obsyncPackage
 
     ### UTILITY ###
     fzf
@@ -115,6 +168,9 @@ in
     ".gitconfig".source = "${dotfilesDir}/.gitconfig";
     ".gitignore_global".source = "${dotfilesDir}/.gitignore_global";
     ".lesskey".source = "${dotfilesDir}/.lesskey";
+
+    # obsync bash completion
+    ".local/share/bash-completion/completions/obsync".text = obsyncCompletion;
 
     # Setting oh-my-posh theme
     #".poshthemes/theme.omp.json".source = lib.mkDefault "${poshThemesDir}/nightowl.omp.json";
