@@ -93,6 +93,23 @@ sudo aa-status | rg bwrap
 
 Das Profil erlaubt ausschließlich `/usr/bin/bwrap` das Erstellen von User-Namespaces — die systemweite Einschränkung bleibt für alle anderen Prozesse aktiv.
 
+### Optional: `/run/user/$UID` vergrößern
+
+Das Scratch-Home des Sandbox (`/home/user`) liegt auf der tmpfs unter `$XDG_RUNTIME_DIR` (`/run/user/$UID`). Diese ist standardmäßig auf 10 % des RAM begrenzt (z. B. ~3,2 GB bei 32 GB). Alle `$HOME`-Schreibzugriffe im Sandbox — pnpm-/npm-Store, Playwright-Browser-Extraktion, Build-Caches — teilen sich diesen Platz und können bei größeren Installationen volllaufen. Die inneren tmpfs (`/tmp`, `/run`, `/dev/shm`) sind davon unabhängig bereits 16 GB groß; das Limit greift nur am Scratch-Home.
+
+Einmalige Vergrößerung auf 8 GB (erfordert `sudo` + erneutes Login):
+
+```bash
+sudo install -Dm644 ~/.config/home-manager/scripts/logind-runtime-size.conf \
+  /etc/systemd/logind.conf.d/10-runtime-size.conf
+```
+
+Danach **vollständig ausloggen und wieder einloggen** (oder rebooten), damit `/run/user/$UID` neu gemountet wird. Ein bloßes `systemctl restart systemd-logind` remountet eine bereits aktive Session nicht. Verifikation nach dem Re-Login:
+
+```bash
+df -h /run/user/$UID
+```
+
 ## Verwendung
 
 Nach `hm_switch` stehen folgende Shell-Funktionen zur Verfügung:
@@ -149,6 +166,29 @@ Praktisch heißt das:
 - Danach wird `config.json` separat geladen und um `/workspace` in `trusted_folders` ergänzt.
 - Host-Dateien wie `~/.copilot/settings.json` und `permissions-config.json` dienen nur als Initial-Fallback. Sobald Sandbox-State existiert, wird er nicht mehr durch den Host überschrieben, damit ein `copilot login` im Sandbox nicht beim nächsten Start verloren geht.
 - Copilot Auto-Update ist im Sandbox standardmäßig deaktiviert (`COPILOT_AUTO_UPDATE=false`), weil die globale Installation read-only eingebunden ist. Updates sollten außerhalb des Sandbox laufen.
+
+#### Copilot-Authentifizierung (Token statt Keyring)
+
+Ab Copilot CLI 1.0.65 wird das OAuth-Token im **System-Credential-Store (Keyring)** abgelegt, nicht mehr in einer Datei unter `~/.copilot/`. Der Sandbox kann dieses Keyring-Token nicht zuverlässig auslesen — Copilot startet dann mit `Login status unknown` / `Logged out`. Der unterstützte Weg für headless/sandboxed Nutzung ist ein Token über die Umgebung (`COPILOT_GITHUB_TOKEN`).
+
+Einmalige Einrichtung:
+
+1. Auf der GHE-Instanz (`https://techhub-by-efs.ghe.com`) ein **fine-grained Personal Access Token (v2)** mit der Berechtigung **„Copilot Requests"** erstellen. (Klassische `ghp_`-PATs werden von Copilot nicht akzeptiert.)
+2. Token in eine Datei legen, nur für den eigenen User lesbar:
+
+   ```bash
+   install -Dm600 /dev/stdin ~/.config/agent-sandbox/copilot/token <<<'<DEIN_TOKEN>'
+   ```
+
+Das Sandbox-Script liest diese Datei (Pfad überschreibbar via `COPILOT_TOKEN_FILE`) und injiziert sie als `COPILOT_GITHUB_TOKEN` über die **vererbte Umgebung** — nicht via `--setenv`, damit das Token nie auf der `bwrap`-Kommandozeile (`ps` / `/proc/PID/cmdline`) erscheint. Beim Start zeigt `copilot_token=injected (host=…)` an, dass Token und Host aktiv sind (`none`, wenn keine Token-Datei vorhanden).
+
+**Wichtig — GHE-Host:** Bei Token-Auth über die Umgebung validiert Copilot standardmäßig gegen `github.com` und ignoriert den Host aus `config.json`. Ein GHE-Data-Residency-PAT führt dann zu `Bad credentials`. Das Script setzt deshalb zusätzlich `COPILOT_GH_HOST` (bloßer Hostname, ohne Schema). Der Host wird in dieser Reihenfolge ermittelt:
+
+1. Umgebungsvariable `COPILOT_GH_HOST`
+2. Datei `~/.config/agent-sandbox/copilot/host` (Pfad überschreibbar via `COPILOT_HOST_FILE`)
+3. Auto-Ableitung des `*.ghe.com`-Hosts aus `~/.copilot/config.json`
+
+Für `techhub-by-efs.ghe.com` greift die Auto-Ableitung, eine `host`-Datei ist also nicht nötig. Den PAT auf genau dieser GHE-Instanz erstellen (nicht auf `github.com`) — ein github.com-Token wird von der GHE-API mit `401 Bad credentials` abgelehnt.
 
 Damit funktioniert `copilot --resume` auch über mehrere Sandbox-Runs hinweg deutlich zuverlässiger.
 

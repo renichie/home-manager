@@ -60,7 +60,25 @@ CMD=("${@:-bash}")
 # Scratch home — ephemeral, cleaned up on exit
 # ---------------------------------------------------------------------------
 
-SANDBOX_HOME="$(mktemp -d "${XDG_RUNTIME_DIR:-/tmp}/agent-home.XXXXXX")"
+RUNTIME_BASE="${XDG_RUNTIME_DIR:-/tmp}"
+
+# Garbage-collect scratch homes leaked by earlier runs that were hard-killed
+# (SIGKILL, terminal hangup) before their cleanup trap could fire. The owning
+# PID is encoded in the directory name; a home is only removed when that PID is
+# no longer alive, so concurrent live sandboxes are never touched. Untagged
+# legacy dirs (no numeric PID field) are left alone — we never delete a home we
+# can't prove is dead.
+for stale in "$RUNTIME_BASE"/agent-home.*; do
+  [[ -d "$stale" ]] || continue
+  stale_pid="${stale##*/agent-home.}"
+  stale_pid="${stale_pid%%.*}"
+  [[ "$stale_pid" =~ ^[0-9]+$ ]] || continue
+  kill -0 "$stale_pid" 2>/dev/null && continue
+  rm -rf "$stale"
+done
+
+# PID-tagged (agent-home.<pid>.XXXXXX) so the GC above can identify the owner.
+SANDBOX_HOME="$(mktemp -d "$RUNTIME_BASE/agent-home.$$.XXXXXX")"
 
 SETTINGS_ROOT="${SANDBOX_SETTINGS_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/agent-sandbox}"
 STATE_ROOT="${SANDBOX_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/agent-sandbox}"
@@ -147,6 +165,13 @@ cleanup() {
   exit "$rc"
 }
 trap cleanup EXIT
+# Ensure the EXIT cleanup also runs when the script is signalled (terminal
+# closed → SIGHUP, kill → SIGTERM, Ctrl-C → SIGINT); each handler just exits,
+# firing the single EXIT trap above. SIGKILL can't be trapped — the startup GC
+# is the backstop for that case.
+trap 'exit 130' INT
+trap 'exit 143' TERM
+trap 'exit 129' HUP
 
 mkdir -p \
   "$SANDBOX_HOME/.config" \
@@ -340,6 +365,11 @@ HOME_BIND_ARGS=()
 [[ -d "$HOME/.nix-profile" ]] && HOME_BIND_ARGS+=(--ro-bind "$HOME/.nix-profile" /home/user/.nix-profile)
 [[ -d "$HOME/.local/bin" ]]   && HOME_BIND_ARGS+=(--ro-bind "$HOME/.local/bin"   /home/user/.local/bin)
 [[ -d "$HOME/.bun" ]]         && HOME_BIND_ARGS+=(--ro-bind "$HOME/.bun"         /home/user/.bun)
+# Playwright browser binaries ($XDG_CACHE_HOME/ms-playwright). Read-only so the
+# agent reuses already-downloaded browsers without re-fetching each run, and
+# cannot tamper with binaries that also execute host-side. Versions not present
+# on the host will fail to install rather than download into the ro mount.
+[[ -d "$HOME/.cache/ms-playwright" ]] && HOME_BIND_ARGS+=(--ro-bind "$HOME/.cache/ms-playwright" /home/user/.cache/ms-playwright)
 
 # Keep Git metadata read-only by default while leaving the worktree writable.
 PROJECT_GIT_ARGS=()
@@ -450,6 +480,41 @@ else
   TRACE_ENABLED="no"
 fi
 
+# GitHub Copilot CLI token. Copilot 1.0.65 keeps its OAuth token in the host
+# keyring, which the sandbox can't read, so it starts "Logged out". A
+# fine-grained v2 PAT with the "Copilot Requests" permission is Copilot's
+# supported headless path (COPILOT_GITHUB_TOKEN). Create the PAT on the GHE host
+# and store it (chmod 600) at the path below. It is injected via the inherited
+# environment — NOT --setenv — so the secret never lands on the bwrap command
+# line (visible in ps / /proc/PID/cmdline); bwrap inherits this process's env
+# because the run below does not use --clearenv.
+COPILOT_TOKEN_FILE="${COPILOT_TOKEN_FILE:-$SETTINGS_ROOT/copilot/token}"
+COPILOT_HOST_FILE="${COPILOT_HOST_FILE:-$SETTINGS_ROOT/copilot/host}"
+COPILOT_TOKEN_STATUS="none"
+if [[ -f "$COPILOT_TOKEN_FILE" && -s "$COPILOT_TOKEN_FILE" ]]; then
+  COPILOT_GITHUB_TOKEN="$(tr -d '\r\n' < "$COPILOT_TOKEN_FILE")"
+  export COPILOT_GITHUB_TOKEN
+  COPILOT_TOKEN_STATUS="injected"
+
+  # With env-token auth, Copilot validates against github.com and ignores the
+  # host in config.json — a GHE data-residency PAT then returns "Bad
+  # credentials". COPILOT_GH_HOST points validation at the right host. Resolve
+  # it from the environment, a sibling `host` file, or by auto-deriving the
+  # *.ghe.com host from config.json. Value must be a bare hostname.
+  copilot_host="${COPILOT_GH_HOST:-}"
+  [[ -z "$copilot_host" && -f "$COPILOT_HOST_FILE" && -s "$COPILOT_HOST_FILE" ]] \
+    && copilot_host="$(tr -d '\r\n' < "$COPILOT_HOST_FILE")"
+  [[ -z "$copilot_host" && -f "$HOME/.copilot/config.json" ]] \
+    && copilot_host="$(grep -oE '"host":[[:space:]]*"https?://[^"]+"' "$HOME/.copilot/config.json" \
+         | grep -oE 'https?://[^"]+' | sed -E 's#https?://##; s#/.*##' \
+         | grep -iE '\.ghe\.com$' | head -1 || true)"
+  if [[ -n "$copilot_host" ]]; then
+    copilot_host="${copilot_host#http://}"; copilot_host="${copilot_host#https://}"; copilot_host="${copilot_host%%/*}"
+    export COPILOT_GH_HOST="$copilot_host"
+    COPILOT_TOKEN_STATUS="injected (host=$copilot_host)"
+  fi
+fi
+
 # Print active runtime settings so it's obvious this is sandboxed.
 printf '[agent-sandbox] SANDBOXED RUN active\n' >&2
 printf '[agent-sandbox] project=%s\n' "$PROJECT" >&2
@@ -463,6 +528,7 @@ printf '[agent-sandbox] network=%s dbus=%s wayland=%s x11=%s trace=%s\n' \
 printf '[agent-sandbox] settings_root=%s\n' "$SETTINGS_ROOT" >&2
 printf '[agent-sandbox] state_root=%s\n' "$STATE_ROOT" >&2
 printf '[agent-sandbox] logfile=%s\n' "$LOGFILE" >&2
+printf '[agent-sandbox] copilot_token=%s\n' "$COPILOT_TOKEN_STATUS" >&2
 printf '[agent-sandbox] cmd=' >&2
 printf '%q ' "${CMD[@]}" >&2
 printf '\n' >&2
