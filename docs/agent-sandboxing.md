@@ -60,7 +60,7 @@ Kurz gesagt funktioniert es so:
 - `agent-sandbox.sh` startet `bwrap` mit eigenen User/PID/IPC/UTS-Namespaces.
 - Das Projekt wird als `/workspace` read-write gemountet; `.git/` wird standardmäßig read-only übermountet. Systempfade (`/usr`, `/nix`, Teile von `/etc`) sind ebenfalls nur read-only.
 - Der Agent läuft mit einem temporären `/home/user`; nach Ende wird dieses gelöscht (außer persistente Settings unter `~/.config/agent-sandbox/`).
-- Lokale Desktop-Session-Sockets werden gezielt durchgereicht: D-Bus für Keyring-Zugriff sowie Wayland-/X11-Clipboard nur dann, wenn die zugehörigen lokalen Sockets tatsächlich existieren.
+- Lokale Desktop-Session-Sockets werden gezielt durchgereicht: D-Bus für Keyring-Zugriff sowie die Zwischenablage (standardmäßig X11/XWayland, siehe Abschnitt „Clipboard / Bild-Paste“) nur dann, wenn die zugehörigen lokalen Sockets tatsächlich existieren.
 
 Das Scratch-Home wird mit `mktemp -d` erstellt. Beim Exit werden temporäre Daten gelöscht; Agent-Settings werden separat persistent gespeichert. Es enthält nur:
 
@@ -221,6 +221,19 @@ EXTRA_BIND="/pfad/host:/pfad/sandbox" sbx-codex  # zusätzlicher Read-Write-Moun
 
 Standardmäßig wird `.git/` read-only übermountet. Damit funktionieren `git status`, `git log` und `git diff` weiter, aber Schreiboperationen wie `git add`, `git commit`, `git fetch` oder `git push` scheitern an den Git-Metadaten.
 
+## Clipboard / Bild-Paste
+
+Die Agenten lesen die Zwischenablage (inklusive eingefügter Bilder) über eine gebündelte Rust-Library (`clipboard-rs`). Deren Wayland-Pfad braucht das Protokoll `wlr-data-control` bzw. `ext-data-control`, das einige Compositor (insbesondere GNOME/Mutter) nicht kompatibel anbieten — dann schlägt Bild-Paste mit „a required Wayland protocol … is not supported by the compositor“ fehl. Der klassische X11-Selektionspfad über XWayland funktioniert dagegen zuverlässig und trägt auch Bilder, die aus nativen Wayland-Apps kopiert wurden.
+
+Deshalb bevorzugt der Sandbox standardmäßig X11/XWayland für die Zwischenablage, sobald ein X-Display erreichbar ist. Steuerbar über `SANDBOX_CLIPBOARD`:
+
+```bash
+SANDBOX_CLIPBOARD=auto     sbx-copilot   # Default: X11 wenn XWayland da, sonst Wayland
+SANDBOX_CLIPBOARD=x11      sbx-copilot   # nur X11/XWayland
+SANDBOX_CLIPBOARD=wayland  sbx-copilot   # native Wayland (z. B. wlroots/Hyprland)
+SANDBOX_CLIPBOARD=off      sbx-copilot   # keine Clipboard-Weiterleitung
+```
+
 ## Logging und Diagnose
 
 Jede Sandbox-Session schreibt ein strukturiertes Log nach `~/.local/state/agent-sandbox/`:
@@ -230,6 +243,9 @@ time=2026-04-10T12:19:26+02:00
 project=/home/ub422/projects/myapp
 no_net=0
 dbus=yes
+clipboard=auto
+wayland=no
+x11=yes
 settings_root=/home/ub422/.config/agent-sandbox
 state_root=/home/ub422/.local/state/agent-sandbox
 cmd=copilot --allow-all

@@ -18,6 +18,11 @@
 #   EXTRA_RO="h:c ..."           Space-separated read-only bind pairs (host:container)
 #   SANDBOX_SETTINGS_DIR=/path   Persistent settings dir (default: ~/.config/agent-sandbox)
 #   SANDBOX_STATE_DIR=/path      Persistent state dir (default: ~/.local/state/agent-sandbox)
+#   SANDBOX_CLIPBOARD=mode       Clipboard transport: auto|x11|wayland|off (default: auto).
+#                                "auto" prefers X11/XWayland because the agents'
+#                                Wayland clipboard path fails on compositors
+#                                without wlr/ext-data-control (e.g. GNOME), which
+#                                breaks image paste.
 #
 # Examples:
 #   agent-sandbox.sh                        # sandbox $PWD, bash
@@ -411,36 +416,82 @@ if [[ -n "${XDG_RUNTIME_DIR:-}" && -S "${XDG_RUNTIME_DIR}/bus" ]]; then
   DBUS_ENABLED="yes"
 fi
 
-# Wayland clipboard/app access uses the compositor socket in XDG_RUNTIME_DIR.
-# /dev/shm is shared with the host so image data can be transferred via
-# the wl_shm protocol (shm_open path used by wl-paste and Wayland clients).
-WAYLAND_ENABLED="no"
-if [[ -n "${XDG_RUNTIME_DIR:-}" && -n "${WAYLAND_DISPLAY:-}" && -S "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}" ]]; then
-  ensure_runtime_dir "${XDG_RUNTIME_DIR}"
-  SESSION_RUNTIME_ARGS+=(--bind "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}" "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}")
-  SESSION_ENV_ARGS+=(--setenv XDG_RUNTIME_DIR "${XDG_RUNTIME_DIR}")
-  SESSION_ENV_ARGS+=(--setenv WAYLAND_DISPLAY "${WAYLAND_DISPLAY}")
-  [[ -d /dev/shm ]] && SESSION_RUNTIME_ARGS+=(--bind /dev/shm /dev/shm)
-  WAYLAND_ENABLED="yes"
-fi
+# Clipboard transport (Wayland vs X11/XWayland).
+#
+# Agents read the clipboard — including pasted images — through a bundled Rust
+# clipboard library (clipboard-rs). On Wayland that library needs the
+# wlr-data-control / ext-data-control protocol, which several compositors
+# (notably GNOME/Mutter) do not expose in a compatible way, so image paste
+# silently fails with "a required Wayland protocol ... is not supported by the
+# compositor". XWayland's classic X11 selections work reliably and also carry
+# images copied from native Wayland apps, so we prefer X11 for the clipboard
+# whenever XWayland is reachable and only fall back to native Wayland when there
+# is no X11 display.
+#
+# Override with SANDBOX_CLIPBOARD=auto|x11|wayland|off (default: auto).
+CLIPBOARD_MODE="${SANDBOX_CLIPBOARD:-auto}"
+case "$CLIPBOARD_MODE" in
+  auto|x11|wayland|off) ;;
+  *) echo "agent-sandbox: invalid SANDBOX_CLIPBOARD='$CLIPBOARD_MODE' (expected auto|x11|wayland|off)" >&2; exit 1 ;;
+esac
 
-# X11 clipboard access needs the display socket and an auth cookie. Bind both
-# only for local unix-domain displays.
-X11_ENABLED="no"
+# Probe which transports the host actually exposes.
+wl_socket=""
+[[ -n "${XDG_RUNTIME_DIR:-}" && -n "${WAYLAND_DISPLAY:-}" && -S "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}" ]] \
+  && wl_socket="${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}"
+
+x11_socket=""
 if [[ "${DISPLAY:-}" =~ ^:([0-9]+)(\.[0-9]+)?$ ]] && [[ -d /tmp/.X11-unix ]]; then
   display_num="${BASH_REMATCH[1]}"
-  display_socket="/tmp/.X11-unix/X${display_num}"
-  if [[ -S "$display_socket" ]]; then
-    ensure_runtime_dir /tmp/.X11-unix
-    SESSION_RUNTIME_ARGS+=(--ro-bind /tmp/.X11-unix /tmp/.X11-unix)
-    SESSION_ENV_ARGS+=(--setenv DISPLAY "${DISPLAY}")
-    X11_ENABLED="yes"
-  fi
+  [[ -S "/tmp/.X11-unix/X${display_num}" ]] && x11_socket="/tmp/.X11-unix/X${display_num}"
 fi
 
-if [[ "$X11_ENABLED" == "yes" && -n "${XAUTHORITY:-}" && -f "${XAUTHORITY}" ]]; then
-  SESSION_RUNTIME_ARGS+=(--ro-bind "${XAUTHORITY}" /tmp/agent-sandbox.Xauthority)
-  SESSION_ENV_ARGS+=(--setenv XAUTHORITY /tmp/agent-sandbox.Xauthority)
+# Resolve the effective transport(s). "auto" prefers X11 when XWayland exists.
+USE_WAYLAND="no"
+USE_X11="no"
+case "$CLIPBOARD_MODE" in
+  off)     ;;
+  x11)     [[ -n "$x11_socket" ]] && USE_X11="yes" ;;
+  wayland) [[ -n "$wl_socket"  ]] && USE_WAYLAND="yes" ;;
+  auto)
+    if   [[ -n "$x11_socket" ]]; then USE_X11="yes"
+    elif [[ -n "$wl_socket"  ]]; then USE_WAYLAND="yes"
+    fi ;;
+esac
+
+WAYLAND_ENABLED="no"
+X11_ENABLED="no"
+
+if [[ "$USE_WAYLAND" == "yes" ]]; then
+  # Native Wayland clipboard. /dev/shm is shared so large image buffers can be
+  # passed via the wl_shm protocol (shm_open) by Wayland clients.
+  ensure_runtime_dir "${XDG_RUNTIME_DIR}"
+  SESSION_RUNTIME_ARGS+=(--bind "$wl_socket" "$wl_socket")
+  SESSION_ENV_ARGS+=(--setenv XDG_RUNTIME_DIR "${XDG_RUNTIME_DIR}")
+  SESSION_ENV_ARGS+=(--setenv WAYLAND_DISPLAY "${WAYLAND_DISPLAY}")
+  SESSION_ENV_ARGS+=(--setenv XDG_SESSION_TYPE wayland)
+  [[ -d /dev/shm ]] && SESSION_RUNTIME_ARGS+=(--bind /dev/shm /dev/shm)
+  WAYLAND_ENABLED="yes"
+else
+  # Not using native Wayland: actively hide WAYLAND_DISPLAY (inherited from the
+  # host env, since bwrap does not --clearenv) so the clipboard library does not
+  # attempt — and fail on — the Wayland path.
+  SESSION_ENV_ARGS+=(--unsetenv WAYLAND_DISPLAY)
+fi
+
+if [[ "$USE_X11" == "yes" ]]; then
+  # X11 clipboard access needs the display socket and an auth cookie.
+  ensure_runtime_dir /tmp/.X11-unix
+  SESSION_RUNTIME_ARGS+=(--ro-bind /tmp/.X11-unix /tmp/.X11-unix)
+  SESSION_ENV_ARGS+=(--setenv DISPLAY "${DISPLAY}")
+  # clipboard-rs keys off XDG_SESSION_TYPE too, so pin it to x11 when we are not
+  # also offering native Wayland.
+  [[ "$USE_WAYLAND" == "yes" ]] || SESSION_ENV_ARGS+=(--setenv XDG_SESSION_TYPE x11)
+  if [[ -n "${XAUTHORITY:-}" && -f "${XAUTHORITY}" ]]; then
+    SESSION_RUNTIME_ARGS+=(--ro-bind "${XAUTHORITY}" /tmp/agent-sandbox.Xauthority)
+    SESSION_ENV_ARGS+=(--setenv XAUTHORITY /tmp/agent-sandbox.Xauthority)
+  fi
+  X11_ENABLED="yes"
 fi
 
 # ---------------------------------------------------------------------------
@@ -456,6 +507,7 @@ LOGFILE="$LOGDIR/$(date +%Y%m%d-%H%M%S)-$$.log"
   printf 'project=%q\n' "$PROJECT"
   printf 'no_net=%q\n'  "$NO_NET"
   printf 'dbus=%s\n'    "$DBUS_ENABLED"
+  printf 'clipboard=%s\n' "$CLIPBOARD_MODE"
   printf 'wayland=%s\n' "$WAYLAND_ENABLED"
   printf 'x11=%s\n'     "$X11_ENABLED"
   printf 'settings_root=%q\n' "$SETTINGS_ROOT"
@@ -519,9 +571,10 @@ fi
 printf '[agent-sandbox] SANDBOXED RUN active\n' >&2
 printf '[agent-sandbox] project=%s\n' "$PROJECT" >&2
 printf '[agent-sandbox] workspace=/workspace home=/home/user (ephemeral)\n' >&2
-printf '[agent-sandbox] network=%s dbus=%s wayland=%s x11=%s trace=%s\n' \
+printf '[agent-sandbox] network=%s dbus=%s clipboard=%s wayland=%s x11=%s trace=%s\n' \
   "$([[ "$NO_NET" == "1" ]] && echo off || echo on)" \
   "$DBUS_ENABLED" \
+  "$CLIPBOARD_MODE" \
   "$WAYLAND_ENABLED" \
   "$X11_ENABLED" \
   "$TRACE_ENABLED" >&2
