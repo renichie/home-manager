@@ -375,6 +375,13 @@ HOME_BIND_ARGS=()
 # cannot tamper with binaries that also execute host-side. Versions not present
 # on the host will fail to install rather than download into the ro mount.
 [[ -d "$HOME/.cache/ms-playwright" ]] && HOME_BIND_ARGS+=(--ro-bind "$HOME/.cache/ms-playwright" /home/user/.cache/ms-playwright)
+# Vim / Neovim config — read-only so the agent can use the host editor settings.
+[[ -f "$HOME/.vimrc" ]]                   && HOME_BIND_ARGS+=(--ro-bind "$HOME/.vimrc"                   /home/user/.vimrc)
+[[ -d "$HOME/.vim" ]]                     && HOME_BIND_ARGS+=(--ro-bind "$HOME/.vim"                     /home/user/.vim)
+[[ -d "$HOME/.config/nvim" ]]             && HOME_BIND_ARGS+=(--ro-bind "$HOME/.config/nvim"             /home/user/.config/nvim)
+# Neovim plugin data — read-only so lazy.nvim reuses host-installed plugins
+# instead of cloning everything fresh on every sandbox session.
+[[ -d "$HOME/.local/share/nvim" ]]        && HOME_BIND_ARGS+=(--ro-bind "$HOME/.local/share/nvim"        /home/user/.local/share/nvim)
 
 # Keep Git metadata read-only by default while leaving the worktree writable.
 PROJECT_GIT_ARGS=()
