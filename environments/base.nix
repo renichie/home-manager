@@ -1,6 +1,8 @@
-{ config, lib, pkgs, ubuntuElectron ? null, ... }:
+{ config, lib, pkgs, ... }:
 
 let
+  ubuntuElectron = config._module.args.ubuntuElectron or null;
+  
   dotfilesDir = ../dotfiles; # Path to your dotfiles directory
   themefilesDir = ../themes;
   poshThemesDir = ../themes/posh;

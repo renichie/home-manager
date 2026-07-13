@@ -1,5 +1,7 @@
-{ config, lib, pkgs, ubuntuElectron ? null, ... }:
+{ config, lib, pkgs, ... }:
 let
+  ubuntuElectron = config._module.args.ubuntuElectron or null;
+  
   homeDir = config.home.homeDirectory;
   teamsForLinuxPackage =
     if ubuntuElectron == null then
