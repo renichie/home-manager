@@ -94,6 +94,8 @@ PERSIST_CODEX_HOME="$STATE_ROOT/codex/home"
 PERSIST_CODEX_XDG_STATE="$STATE_ROOT/codex/xdg-state"
 PERSIST_CLAUDE_SETTINGS="$SETTINGS_ROOT/claude/settings.json"
 PERSIST_CLAUDE_HOME="$STATE_ROOT/claude/home"
+PERSIST_JUNIE_SETTINGS="$SETTINGS_ROOT/junie/settings.json"
+PERSIST_JUNIE_HOME="$STATE_ROOT/junie/home"
 mkdir -p \
   "$(dirname "$PERSIST_COPILOT_CONFIG")" \
   "$PERSIST_COPILOT_HOME" \
@@ -101,7 +103,9 @@ mkdir -p \
   "$PERSIST_CODEX_HOME" \
   "$PERSIST_CODEX_XDG_STATE" \
   "$(dirname "$PERSIST_CLAUDE_SETTINGS")" \
-  "$PERSIST_CLAUDE_HOME"
+  "$PERSIST_CLAUDE_HOME" \
+  "$(dirname "$PERSIST_JUNIE_SETTINGS")" \
+  "$PERSIST_JUNIE_HOME"
 
 sync_tree() {
   local src="$1"
@@ -136,11 +140,15 @@ cleanup() {
   if [[ -f "$SANDBOX_HOME/.claude/settings.json" ]]; then
     cp "$SANDBOX_HOME/.claude/settings.json" "$PERSIST_CLAUDE_SETTINGS" || true
   fi
+  if [[ -f "$SANDBOX_HOME/.junie/settings.json" ]]; then
+    cp "$SANDBOX_HOME/.junie/settings.json" "$PERSIST_JUNIE_SETTINGS" || true
+  fi
   {
     printf 'cleanup_copilot_home_exists=%s\n' "$([[ -d "$SANDBOX_HOME/.copilot" ]] && echo yes || echo no)"
     printf 'cleanup_codex_home_exists=%s\n' "$([[ -d "$SANDBOX_HOME/.codex" ]] && echo yes || echo no)"
     printf 'cleanup_codex_xdg_state_exists=%s\n' "$([[ -d "$SANDBOX_HOME/.local/state/codex" ]] && echo yes || echo no)"
     printf 'cleanup_claude_home_exists=%s\n' "$([[ -d "$SANDBOX_HOME/.claude" ]] && echo yes || echo no)"
+    printf 'cleanup_junie_home_exists=%s\n' "$([[ -d "$SANDBOX_HOME/.junie" ]] && echo yes || echo no)"
   } >> "${LOGFILE:-/dev/null}" 2>/dev/null || true
   if [[ -d "$SANDBOX_HOME/.copilot" ]]; then
     sync_tree "$SANDBOX_HOME/.copilot" "$PERSIST_COPILOT_HOME" \
@@ -162,6 +170,13 @@ cleanup() {
     sync_tree "$SANDBOX_HOME/.claude" "$PERSIST_CLAUDE_HOME" \
       --exclude credentials.json \
       --exclude settings.json \
+      --exclude tmp \
+      --exclude .tmp || true
+  fi
+  if [[ -d "$SANDBOX_HOME/.junie" ]]; then
+    sync_tree "$SANDBOX_HOME/.junie" "$PERSIST_JUNIE_HOME" \
+      --exclude settings.json \
+      --exclude secure_credentials.json \
       --exclude tmp \
       --exclude .tmp || true
   fi
@@ -298,6 +313,33 @@ if [[ -n "$CLAUDE_SOURCE_SETTINGS" ]]; then
   fi
 fi
 
+# JetBrains Junie CLI — state (sessions, allowlist.json, mcp/, models/,
+# agent-skills/) + settings.json. secure_credentials.json is only the fallback
+# secret store used when no system keyring is available, so it is re-seeded
+# fresh from the host each run (like Claude's credentials.json) rather than
+# persisted from the sandbox.
+if [[ -d "$PERSIST_JUNIE_HOME" ]]; then
+  mkdir -p "$SANDBOX_HOME/.junie"
+  sync_tree "$PERSIST_JUNIE_HOME" "$SANDBOX_HOME/.junie" \
+    --exclude settings.json \
+    --exclude secure_credentials.json \
+    --exclude tmp \
+    --exclude .tmp
+fi
+
+if [[ -f "$HOME/.junie/secure_credentials.json" ]]; then
+  mkdir -p "$SANDBOX_HOME/.junie"
+  cp "$HOME/.junie/secure_credentials.json" "$SANDBOX_HOME/.junie/secure_credentials.json"
+fi
+
+JUNIE_SOURCE_SETTINGS=""
+[[ -f "$PERSIST_JUNIE_SETTINGS" && -s "$PERSIST_JUNIE_SETTINGS" ]] && JUNIE_SOURCE_SETTINGS="$PERSIST_JUNIE_SETTINGS"
+[[ -z "$JUNIE_SOURCE_SETTINGS" && -f "$HOME/.junie/settings.json" ]] && JUNIE_SOURCE_SETTINGS="$HOME/.junie/settings.json"
+if [[ -n "$JUNIE_SOURCE_SETTINGS" ]]; then
+  mkdir -p "$SANDBOX_HOME/.junie"
+  cp "$JUNIE_SOURCE_SETTINGS" "$SANDBOX_HOME/.junie/settings.json"
+fi
+
 # ---------------------------------------------------------------------------
 # Network
 # ---------------------------------------------------------------------------
@@ -370,6 +412,9 @@ HOME_BIND_ARGS=()
 [[ -d "$HOME/.nix-profile" ]] && HOME_BIND_ARGS+=(--ro-bind "$HOME/.nix-profile" /home/user/.nix-profile)
 [[ -d "$HOME/.local/bin" ]]   && HOME_BIND_ARGS+=(--ro-bind "$HOME/.local/bin"   /home/user/.local/bin)
 [[ -d "$HOME/.bun" ]]         && HOME_BIND_ARGS+=(--ro-bind "$HOME/.bun"         /home/user/.bun)
+# Junie CLI's ~/.local/bin/junie shim execs the versioned binary from here;
+# without it the shim can't find anything to run.
+[[ -d "$HOME/.local/share/junie" ]] && HOME_BIND_ARGS+=(--ro-bind "$HOME/.local/share/junie" /home/user/.local/share/junie)
 # Playwright browser binaries ($XDG_CACHE_HOME/ms-playwright). Read-only so the
 # agent reuses already-downloaded browsers without re-fetching each run, and
 # cannot tamper with binaries that also execute host-side. Versions not present
@@ -574,6 +619,20 @@ if [[ -f "$COPILOT_TOKEN_FILE" && -s "$COPILOT_TOKEN_FILE" ]]; then
   fi
 fi
 
+# JetBrains Junie CLI token. Junie authenticates headlessly via JUNIE_API_KEY
+# (see `junie --auth` / https://junie.jetbrains.com/cli). Store it (chmod 600)
+# at the path below. Injected via the inherited environment — NOT --setenv —
+# so the secret never lands on the bwrap command line (visible in ps /
+# /proc/PID/cmdline); bwrap inherits this process's env because the run below
+# does not use --clearenv.
+JUNIE_TOKEN_FILE="${JUNIE_TOKEN_FILE:-$SETTINGS_ROOT/junie/token}"
+JUNIE_TOKEN_STATUS="none"
+if [[ -f "$JUNIE_TOKEN_FILE" && -s "$JUNIE_TOKEN_FILE" ]]; then
+  JUNIE_API_KEY="$(tr -d '\r\n' < "$JUNIE_TOKEN_FILE")"
+  export JUNIE_API_KEY
+  JUNIE_TOKEN_STATUS="injected"
+fi
+
 # Print active runtime settings so it's obvious this is sandboxed.
 printf '[agent-sandbox] SANDBOXED RUN active\n' >&2
 printf '[agent-sandbox] project=%s\n' "$PROJECT" >&2
@@ -589,6 +648,7 @@ printf '[agent-sandbox] settings_root=%s\n' "$SETTINGS_ROOT" >&2
 printf '[agent-sandbox] state_root=%s\n' "$STATE_ROOT" >&2
 printf '[agent-sandbox] logfile=%s\n' "$LOGFILE" >&2
 printf '[agent-sandbox] copilot_token=%s\n' "$COPILOT_TOKEN_STATUS" >&2
+printf '[agent-sandbox] junie_token=%s\n' "$JUNIE_TOKEN_STATUS" >&2
 printf '[agent-sandbox] cmd=' >&2
 printf '%q ' "${CMD[@]}" >&2
 printf '\n' >&2

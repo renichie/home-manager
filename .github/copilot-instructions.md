@@ -72,10 +72,12 @@ reload-hotkeys   # or: systemctl --user restart xremap.service
 Default shell behavior (from `dotfiles/.bash_aliases`):
 
 ```bash
-copilot                 # sandboxed + --allow-all
-codex                   # sandboxed + --full-auto
-copilot-vanilla         # host copilot (no sandbox)
-codex-vanilla           # host codex (no sandbox)
+copilot                 # host copilot (no sandbox)
+codex                   # host codex (no sandbox)
+junie                   # host junie (no sandbox)
+copilot-sandboxed       # sandboxed + --allow-all
+codex-sandboxed         # sandboxed + --dangerously-bypass-approvals-and-sandbox
+junie-sandboxed         # sandboxed + --brave
 ```
 
 Additional helpers:

@@ -135,6 +135,13 @@ fi
 ####################################### TFSWITCH  #########################################
 export PATH="$HOME/.terraform.versions:$PATH"
 
+####################################### LOCAL BIN #########################################
+# Home Manager overwrites ~/.profile with its own minimal version (only
+# sourcing hm-session-vars.sh), so the distro-default PATH addition for
+# ~/.local/bin never happens. Needed for e.g. junie / codex / copilot,
+# whose installers (curl|bash / npm -g) drop binaries there.
+export PATH="$HOME/.local/bin:$PATH"
+
 
 
 ####################################### ADDITIONAL CMDS ###################################

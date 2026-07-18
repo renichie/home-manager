@@ -1,6 +1,6 @@
 # AI Agent Sandboxing mit Bubblewrap
 
-Dieses Setup isoliert KI-Coding-Agenten (GitHub Copilot CLI, OpenAI Codex) auf dem Linux-Desktop mit [bubblewrap](https://github.com/containers/bubblewrap) — demselben Sandboxing-Mechanismus, den Flatpak verwendet.
+Dieses Setup isoliert KI-Coding-Agenten (GitHub Copilot CLI, OpenAI Codex, Claude Code, JetBrains Junie CLI) auf dem Linux-Desktop mit [bubblewrap](https://github.com/containers/bubblewrap) — demselben Sandboxing-Mechanismus, den Flatpak verwendet.
 
 ## Warum überhaupt sandboxen?
 
@@ -48,7 +48,7 @@ Der Sandbox-Ansatz hier setzt auf **defense in depth** für den normalen Dev-Wor
 │  │  /usr, /nix  →  Host (ro)                    │  │
 │  │  /etc/...    →  Host (ro, minimaler Subset)  │  │
 │  │                                               │  │
-│  │  copilot / codex / claude                      │  │
+│  │  copilot / codex / claude / junie              │  │
 │  └───────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────┘
 ```
@@ -65,7 +65,7 @@ Kurz gesagt funktioniert es so:
 Das Scratch-Home wird mit `mktemp -d` erstellt. Beim Exit werden temporäre Daten gelöscht; Agent-Settings werden separat persistent gespeichert. Es enthält nur:
 
 - `.gitconfig` und `.gitignore_global` (nicht-sensitiv)
-- Genau die benötigten Agent-Dateien (Copilot: `~/.copilot/config.json`, Codex: `~/.codex/auth.json` + `~/.codex/config.toml`, Claude: `~/.claude/credentials.json` + `~/.claude/settings.json`)
+- Genau die benötigten Agent-Dateien (Copilot: `~/.copilot/config.json`, Codex: `~/.codex/auth.json` + `~/.codex/config.toml`, Claude: `~/.claude/credentials.json` + `~/.claude/settings.json`, Junie: `~/.junie/settings.json` + optional `~/.junie/secure_credentials.json`)
 - Eine modifizierte Config mit `/workspace` als vertrauenswürdigem Ordner (damit der Trust-Dialog nicht bei jedem Start erscheint)
 
 Settings und lokaler Session-State aus Sandbox-Sessions werden nach `~/.config/agent-sandbox/` bzw. `~/.local/state/agent-sandbox/` synchronisiert und beim nächsten Start wieder geladen.
@@ -115,19 +115,19 @@ df -h /run/user/$UID
 Nach `hm_switch` stehen folgende Shell-Funktionen zur Verfügung:
 
 ```bash
-copilot                # Default: Sandbox + --allow-all
-codex                  # Default: Sandbox + --full-auto, aber .git/ read-only
-claude                 # Default: Sandbox + --dangerously-skip-permissions
-copilot-vanilla        # Host-Copilot ohne Sandbox
-codex-vanilla          # Host-Codex ohne Sandbox
-claude-vanilla         # Host-Claude ohne Sandbox
+copilot                # Host-Copilot ohne Sandbox
+codex                  # Host-Codex ohne Sandbox
+junie                  # Host-Junie ohne Sandbox
+copilot-sandboxed      # Sandbox + --allow-all
+codex-sandboxed        # Sandbox + --dangerously-bypass-approvals-and-sandbox, aber .git/ read-only
+junie-sandboxed        # Sandbox + --brave (Brave Mode, keine Approval-Prompts)
 sbx                    # Sandbox für $PWD, interaktive Bash
 sbx-copilot            # Copilot CLI im Sandbox
 sbx-copilot-yolo       # Copilot mit --allow-all (kein Confirmation-Prompt)
 sbx-codex              # Codex CLI im Sandbox
-sbx-codex-yolo         # Codex mit --full-auto
-sbx-claude             # Claude CLI im Sandbox
-sbx-claude-yolo        # Claude mit --dangerously-skip-permissions
+sbx-codex-yolo         # Codex mit --dangerously-bypass-approvals-and-sandbox
+sbx-junie              # Junie CLI im Sandbox
+sbx-junie-yolo         # Junie mit --brave (Brave Mode)
 sbx-nonet              # Sandbox ohne Netzwerkzugriff
 ```
 
@@ -136,13 +136,13 @@ Das Projekt wird immer aus dem aktuellen Arbeitsverzeichnis (`$PWD`) genommen.
 Argumente werden durchgereicht:
 
 ```bash
-copilot --resume               # Copilot-Session fortsetzen (sandboxed yolo)
-codex --prompt "..."           # Direkt einen Prompt übergeben (sandboxed yolo)
-claude --resume                # Claude-Session fortsetzen (sandboxed yolo)
-copilot-vanilla --resume       # Host-Copilot explizit ohne Sandbox
-codex-vanilla --prompt "..."   # Host-Codex explizit ohne Sandbox
-claude-vanilla --resume        # Host-Claude explizit ohne Sandbox
-sbx -n codex                   # Codex ohne Netz (explizit)
+copilot-sandboxed --resume        # Copilot-Session fortsetzen (sandboxed yolo)
+codex-sandboxed --prompt "..."    # Direkt einen Prompt übergeben (sandboxed yolo)
+junie-sandboxed --resume          # Junie-Session fortsetzen (sandboxed, Brave Mode)
+copilot --resume                  # Host-Copilot ohne Sandbox
+codex --prompt "..."              # Host-Codex ohne Sandbox
+junie --resume                    # Host-Junie ohne Sandbox
+sbx -n codex                      # Codex ohne Netz (explizit)
 ```
 
 Persistente Settings und lokaler Agent-State:
@@ -151,10 +151,12 @@ Persistente Settings und lokaler Agent-State:
 ~/.config/agent-sandbox/codex/config.toml
 ~/.config/agent-sandbox/copilot/config.json
 ~/.config/agent-sandbox/claude/settings.json
+~/.config/agent-sandbox/junie/settings.json
 ~/.local/state/agent-sandbox/copilot/home/
 ~/.local/state/agent-sandbox/codex/home/
 ~/.local/state/agent-sandbox/codex/xdg-state/
 ~/.local/state/agent-sandbox/claude/home/
+~/.local/state/agent-sandbox/junie/home/
 ```
 
 Für Copilot wird neben `config.json` auch der restliche Inhalt von `~/.copilot/` in einen separaten State-Pfad gespiegelt. Damit bleiben lokale Sessions, Resume-Metadaten, Logs und andere CLI-Artefakte über mehrere Sandbox-Runs hinweg erhalten, ohne die modifizierte `config.json` mit dem Trust-Eintrag mit dem übrigen State zu vermischen.
@@ -211,6 +213,24 @@ Für Claude Code wird `~/.claude/` nach dem gleichen Muster behandelt:
 - Restlicher State (Sessions, Logs, Projects) wird nach `~/.local/state/agent-sandbox/claude/home/` persistiert.
 
 Damit funktioniert `claude --resume` über mehrere Sandbox-Runs hinweg.
+
+Für JetBrains Junie CLI wird `~/.junie/` nach dem gleichen Muster behandelt:
+
+- `settings.json` wird persistent gespeichert.
+- `secure_credentials.json` wird bei jedem Start frisch vom Host geseeded (ephemeral, nicht persistiert) — das ist Junies Fallback-Secret-Store, der nur greift, wenn kein System-Keyring verfügbar ist.
+- Restlicher State (`sessions/`, `allowlist.json`, `mcp/`, `models/`, `agent-skills/`, Logs) wird nach `~/.local/state/agent-sandbox/junie/home/` persistiert.
+
+Junie selbst wird von diesem Repo nicht als Nix-Package gebaut, weil der CLI-Shim sich selbst aktualisiert (neue Versionen landen unter `~/.local/share/junie/versions/<version>/`) — ein unveränderlicher Nix-Store-Pfad stünde dem im Weg, genau wie bei Copilot (`COPILOT_AUTO_UPDATE=false`). Stattdessen führt `environments/base.nix` bei jedem `home-manager switch` über `home.activation.installJunieCli` einen Versions-Check gegen das öffentliche Update-Manifest durch: Nur wenn die lokal installierte Version nicht der neuesten für die eigene Plattform entspricht, wird der offizielle Installer (`curl -fsSL https://junie.jetbrains.com/install.sh | bash`) tatsächlich ausgeführt und lädt das ~200-MB-Release neu herunter. Ist bereits die aktuelle Version installiert, ist der Schritt ein No-Op (kein Download, < 1 Sekunde) — der Installer selbst prüft das nämlich nicht und würde bei jedem Aufruf blind neu herunterladen. Der Shim landet unter `~/.local/bin/junie`, die eigentlichen Binaries unter `~/.local/share/junie`. Beide Pfade sind bereits im Sandbox read-only eingebunden (wie bei Copilot/Codex), sodass keine manuelle Installation mehr nötig ist.
+
+#### Junie-Authentifizierung (Headless)
+
+Junie unterstützt Auth über die Umgebungsvariable `JUNIE_API_KEY` (Token generieren unter [junie.jetbrains.com/cli](https://junie.jetbrains.com/cli)). Einmalige Einrichtung:
+
+```bash
+install -Dm600 /dev/stdin ~/.config/agent-sandbox/junie/token <<<'<DEIN_TOKEN>'
+```
+
+Das Sandbox-Script liest diese Datei (Pfad überschreibbar via `JUNIE_TOKEN_FILE`) und injiziert sie als `JUNIE_API_KEY` über die vererbte Umgebung — nicht via `--setenv`, damit das Token nie auf der `bwrap`-Kommandozeile erscheint. Beim Start zeigt `junie_token=injected` an, dass das Token aktiv ist (`none`, wenn keine Token-Datei vorhanden ist). Alternativ funktioniert auch die JetBrains-Account-Anmeldung, sofern das lokale Session-Keyring über D-Bus im Sandbox erreichbar ist (siehe Copilot-Abschnitt oben zu `~/.local/share/keyrings`).
 
 Extra Bind-Mounts für Sonderfälle:
 

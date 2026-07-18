@@ -106,17 +106,18 @@ alias ......='cd ../../../../..'
 
 # ------------------------- AI Agent Sandbox --------------------------
 # Shell functions (not aliases) so arguments pass through cleanly.
-# Usage: copilot / codex (sandboxed yolo by default), or *-vanilla for host.
-sbx()              { ~/.local/bin/agent-sandbox.sh "$PWD" "$@"; }
-sbx-copilot()      { ~/.local/bin/agent-sandbox.sh "$PWD" copilot "$@"; }
-sbx-copilot-yolo() { ~/.local/bin/agent-sandbox.sh "$PWD" copilot --allow-all "$@"; }
-sbx-codex()        { ~/.local/bin/agent-sandbox.sh "$PWD" codex "$@"; }
-sbx-codex-yolo()   { ~/.local/bin/agent-sandbox.sh "$PWD" codex --dangerously-bypass-approvals-and-sandbox "$@"; }
-sbx-nonet()        { NO_NET=1 ~/.local/bin/agent-sandbox.sh "$PWD" "$@"; }
-copilot()          { sbx-copilot-yolo "$@"; }
-codex()            { sbx-codex-yolo "$@"; }
-copilot-vanilla()  { command copilot "$@"; }
-codex-vanilla()    { command codex "$@"; }
+# Usage: copilot / codex / junie run plain on the host; *-sandboxed for sandboxed yolo.
+sbx()               { ~/.local/bin/agent-sandbox.sh "$PWD" "$@"; }
+sbx-copilot()       { ~/.local/bin/agent-sandbox.sh "$PWD" copilot "$@"; }
+sbx-copilot-yolo()  { ~/.local/bin/agent-sandbox.sh "$PWD" copilot --allow-all "$@"; }
+sbx-codex()         { ~/.local/bin/agent-sandbox.sh "$PWD" codex "$@"; }
+sbx-codex-yolo()    { ~/.local/bin/agent-sandbox.sh "$PWD" codex --dangerously-bypass-approvals-and-sandbox "$@"; }
+sbx-junie()         { ~/.local/bin/agent-sandbox.sh "$PWD" junie "$@"; }
+sbx-junie-yolo()    { ~/.local/bin/agent-sandbox.sh "$PWD" junie --brave "$@"; }
+sbx-nonet()         { NO_NET=1 ~/.local/bin/agent-sandbox.sh "$PWD" "$@"; }
+copilot-sandboxed() { sbx-copilot-yolo "$@"; }
+codex-sandboxed()   { sbx-codex-yolo "$@"; }
+junie-sandboxed()   { sbx-junie-yolo "$@"; }
 
 # --------------------------- Navigation WORK -------------------------
 alias sdkdir='cd ~/projects/sdk'

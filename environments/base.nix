@@ -124,6 +124,8 @@ in
     ripgrep-all
     glow # markdown renderer
     mdformat
+    curl
+    unzip # required by the Junie CLI installer, see home.activation.installJunieCli below
 
     ### DIAGRAMS ###
     graphviz
@@ -257,4 +259,65 @@ in
     };
 
   };
+
+  # JetBrains Junie CLI has no nixpkgs package and bundles its own JetBrains
+  # Runtime + self-updating shim (installed versions live under
+  # ~/.local/share/junie/versions/<version>/, selected by ~/.local/bin/junie).
+  # Packaging it as an immutable Nix derivation would fight that updater (the
+  # Nix store is read-only, so it could never write a new version in place)
+  # -- the same tradeoff already documented for Copilot CLI in
+  # docs/agent-sandboxing.md (COPILOT_AUTO_UPDATE=false). Instead, run the
+  # official installer on `home-manager switch`, but only when a newer
+  # version is actually available: the installer itself always
+  # re-downloads/overwrites regardless of what's installed (no version check
+  # of its own), so calling it unconditionally on every switch would re-fetch
+  # the ~200MB release archive every time. We instead do a cheap pre-check
+  # against the small public update-info manifest and skip the installer
+  # entirely when the locally installed version already matches the latest
+  # one for our platform.
+  home.activation.installJunieCli =
+    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      if [[ -v DRY_RUN ]]; then
+        echo "Would check/install/update Junie CLI (junie.jetbrains.com/install.sh)"
+      else
+        PATH="${pkgs.curl}/bin:${pkgs.unzip}/bin:${pkgs.coreutils}/bin:${pkgs.gnugrep}/bin:${pkgs.gnused}/bin:$PATH" \
+          ${pkgs.bash}/bin/bash -c '
+            set -uo pipefail
+
+            junie_data="$HOME/.local/share/junie"
+            current_link="$junie_data/current"
+            update_info_url="https://raw.githubusercontent.com/jetbrains-junie/junie/main/update-info.jsonl"
+
+            installed_version=""
+            if [[ -L "$current_link" ]]; then
+              installed_version="$(basename "$(readlink -f "$current_link" 2>/dev/null)" 2>/dev/null)"
+            fi
+
+            os_name="" arch_name=""
+            case "$(uname -s)" in
+              Linux)  os_name="linux" ;;
+              Darwin) os_name="macos" ;;
+            esac
+            case "$(uname -m)" in
+              x86_64|amd64)  arch_name="amd64" ;;
+              aarch64|arm64) arch_name="aarch64" ;;
+            esac
+            platform="''${os_name}-''${arch_name}"
+
+            latest_version=""
+            if [[ -n "$os_name" && -n "$arch_name" ]]; then
+              latest_version="$(curl -fsSL "$update_info_url" 2>/dev/null \
+                | grep "\"platform\":\"$platform\"" | tail -1 \
+                | sed -n "s/.*\"version\":\"\([^\"]*\)\".*/\1/p")"
+            fi
+
+            if [[ -n "$installed_version" && -n "$latest_version" && "$installed_version" == "$latest_version" ]]; then
+              echo "[home-manager] Junie CLI already up to date ($installed_version)"
+            else
+              echo "[home-manager] Installing/updating Junie CLI (''${installed_version:-none} -> ''${latest_version:-latest})..."
+              curl -fsSL https://junie.jetbrains.com/install.sh | bash
+            fi
+          ' || echo "[home-manager] Junie CLI install/update check failed (offline?) -- continuing" >&2
+      fi
+    '';
 }
