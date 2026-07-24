@@ -56,6 +56,13 @@ if [[ $# -gt 0 && -d "$1" ]]; then
   PROJECT="$(realpath "$1")"
   shift
 else
+  # A path-like first arg that is not a directory is almost certainly a
+  # project dir that no longer exists (e.g. stale $PWD after a rename) —
+  # fail fast instead of silently treating it as the command to exec.
+  if [[ $# -gt 0 && "$1" == */* && ! -x "$1" ]]; then
+    echo "agent-sandbox: project dir does not exist: $1" >&2
+    exit 1
+  fi
   PROJECT="$(realpath "$PWD")"
 fi
 

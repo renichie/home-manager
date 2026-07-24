@@ -13,6 +13,8 @@ home-manager build --flake .#DPC0155
 
 `switch` applies a profile to the active machine and keeps a backup. `build` is the safest validation step for changes because it evaluates the flake without replacing the active profile. If your shell config is active, `hm_switch` selects the flake from the hostname automatically.
 
+**Agents: never run `home-manager switch` / `hm_switch` yourself.** Only validate with `home-manager build --flake .#<TARGET>` and leave applying the profile to the user — switching replaces the live home environment and is the user's decision.
+
 ## Coding Style & Naming Conventions
 Keep Nix files concise and consistent with the existing style: two-space indentation, grouped sections, and trailing semicolons on attributes. Name environment files after the host or scope they configure, for example `dpc0155.nix` or `desktop.hyprland.nix`. Shell code in `dotfiles/.bashrc` and `scripts/*.sh` should favor clear function names, minimal side effects, and brief comments only where behavior is non-obvious.
 

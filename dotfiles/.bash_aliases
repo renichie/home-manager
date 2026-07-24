@@ -107,17 +107,28 @@ alias ......='cd ../../../../..'
 # ------------------------- AI Agent Sandbox --------------------------
 # Shell functions (not aliases) so arguments pass through cleanly.
 # Usage: copilot / codex / junie run plain on the host; *-sandboxed for sandboxed yolo.
-sbx()               { ~/.local/bin/agent-sandbox.sh "$PWD" "$@"; }
-sbx-copilot()       { ~/.local/bin/agent-sandbox.sh "$PWD" copilot "$@"; }
-sbx-copilot-yolo()  { ~/.local/bin/agent-sandbox.sh "$PWD" copilot --allow-all "$@"; }
-sbx-codex()         { ~/.local/bin/agent-sandbox.sh "$PWD" codex "$@"; }
-sbx-codex-yolo()    { ~/.local/bin/agent-sandbox.sh "$PWD" codex --dangerously-bypass-approvals-and-sandbox "$@"; }
-sbx-junie()         { ~/.local/bin/agent-sandbox.sh "$PWD" junie "$@"; }
-sbx-junie-yolo()    { ~/.local/bin/agent-sandbox.sh "$PWD" junie --brave "$@"; }
-sbx-nonet()         { NO_NET=1 ~/.local/bin/agent-sandbox.sh "$PWD" "$@"; }
+# "$(pwd -P)" instead of "$PWD": after the cwd is renamed, bash keeps the stale
+# logical path in $PWD; pwd -P always yields the physical, existing path.
+sbx()               { ~/.local/bin/agent-sandbox.sh "$(pwd -P)" "$@"; }
+sbx-copilot()       { ~/.local/bin/agent-sandbox.sh "$(pwd -P)" copilot "$@"; }
+sbx-copilot-yolo()  { ~/.local/bin/agent-sandbox.sh "$(pwd -P)" copilot --allow-all "$@"; }
+sbx-codex()         { ~/.local/bin/agent-sandbox.sh "$(pwd -P)" codex "$@"; }
+sbx-codex-yolo()    { ~/.local/bin/agent-sandbox.sh "$(pwd -P)" codex --dangerously-bypass-approvals-and-sandbox "$@"; }
+sbx-junie()         { ~/.local/bin/agent-sandbox.sh "$(pwd -P)" junie "$@"; }
+sbx-junie-yolo()    { ~/.local/bin/agent-sandbox.sh "$(pwd -P)" junie --brave "$@"; }
+sbx-nonet()         { NO_NET=1 ~/.local/bin/agent-sandbox.sh "$(pwd -P)" "$@"; }
 copilot-sandboxed() { sbx-copilot-yolo "$@"; }
 codex-sandboxed()   { sbx-codex-yolo "$@"; }
 junie-sandboxed()   { sbx-junie-yolo "$@"; }
+
+# Copilot CLI's bundled clipboard-rs reads images via the wlr-data-control /
+# ext-data-control Wayland protocol, which GNOME/Mutter does not implement
+# (deliberately, over clipboard-snooping concerns) — so image paste silently
+# fails on a plain GNOME Wayland session. XWayland's classic X11 selection
+# path works and also carries images copied from native Wayland apps, so
+# force that path (unset, not empty-string, or clipboard-rs still detects a
+# Wayland env). Same fix already applied to sbx-copilot via agent-sandbox.sh.
+copilot() { (unset WAYLAND_DISPLAY; export XDG_SESSION_TYPE=x11; command copilot "$@"); }
 
 # --------------------------- Navigation WORK -------------------------
 alias sdkdir='cd ~/projects/sdk'

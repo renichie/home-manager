@@ -14,6 +14,8 @@ home-manager switch --flake .#<HOST> -b bckp
 
 Defined hosts: `DPC0155` (Ubuntu/work), `HERA` (Linux), `NYX` (Manjaro/desktop).
 
+**Agents: never run `hm_switch` / `home-manager switch` yourself.** Only validate changes with `home-manager build --flake .#<HOST>` — applying the profile replaces the live home environment and is always the user's decision.
+
 ## Architecture
 
 ```
