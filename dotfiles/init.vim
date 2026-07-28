@@ -21,7 +21,12 @@ require("lazy").setup({
       vim.o.background = "dark"                 -- or "light"
       vim.g.gruvbox_material_background = "medium"  -- "hard", "medium", "soft"
       vim.g.gruvbox_material_enable_italic = 1
-      vim.g.gruvbox_material_better_performance = 1
+      -- better_performance caches after/syntax in the plugin dir, falling back
+      -- to stdpath("config"). In the agent sandbox both are read-only binds,
+      -- which makes the colorscheme abort with E739, so only enable it when
+      -- the config dir is writable.
+      vim.g.gruvbox_material_better_performance =
+        vim.fn.filewritable(vim.fn.stdpath("config")) == 2 and 1 or 0
 
       vim.cmd("colorscheme gruvbox-material")
     end,
