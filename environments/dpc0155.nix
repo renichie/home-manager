@@ -47,6 +47,7 @@ in
     krew # needs `export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH` for installs
 
     ### DEVELOPMENT PACKAGES ###
+    gh
     nodejs_22
     maven
     pnpm
@@ -84,6 +85,35 @@ in
 
   # override oh-my-posh-theme
   #  home.file.".poshthemes/theme.omp.json".source = ../themes/posh/gruvbox.omp.json;
+
+  # JetBrains Junie CLI -- this host only; there is no nixpkgs package and the
+  # tool bundles its own JetBrains Runtime plus a self-updating shim (versions
+  # live under ~/.local/share/junie/versions/<version>/, selected by
+  # ~/.local/bin/junie). Packaging it as an immutable Nix derivation would fight
+  # that updater, since the read-only store could never take a new version in
+  # place -- the same tradeoff documented for Copilot CLI in
+  # docs/agent-sandboxing.md (COPILOT_AUTO_UPDATE=false).
+  #
+  # We install once and never again: while you work, the running binary already
+  # downloads the next release into ~/.local/share/junie/updates/ and the shim
+  # verifies its SHA-256 and swaps it in on the next launch (see
+  # ~/.junie/logs/upgrade.log). Re-running the official installer from activation
+  # would only duplicate that ~270MB download -- synchronously, so every
+  # `home-manager switch` blocks on it. Upgrades are Junie's job; activation just
+  # bootstraps a machine whose shim is missing.
+  home.activation.installJunieCli =
+    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      if [[ -v DRY_RUN ]]; then
+        echo "Would install Junie CLI if $HOME/.local/bin/junie is missing"
+      elif [[ -x "$HOME/.local/bin/junie" ]]; then
+        echo "[home-manager] Junie CLI already installed -- leaving updates to Junie"
+      else
+        echo "[home-manager] Installing Junie CLI (junie.jetbrains.com/install.sh)..."
+        PATH="${pkgs.curl}/bin:${pkgs.unzip}/bin:${pkgs.coreutils}/bin:$PATH" \
+          ${pkgs.bash}/bin/bash -c 'curl -fsSL https://junie.jetbrains.com/install.sh | bash' \
+          || echo "[home-manager] Junie CLI install failed (offline?) -- continuing" >&2
+      fi
+    '';
 
   systemd.user.services.ydotoold = {
     Unit = {
