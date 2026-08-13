@@ -128,7 +128,25 @@ junie-sandboxed()   { sbx-junie-yolo "$@"; }
 # path works and also carries images copied from native Wayland apps, so
 # force that path (unset, not empty-string, or clipboard-rs still detects a
 # Wayland env). Same fix already applied to sbx-copilot via agent-sandbox.sh.
-copilot() { (unset WAYLAND_DISPLAY; export XDG_SESSION_TYPE=x11; command copilot "$@"); }
+#
+# The `exec -a copilot node <script>` is for tmux's automatic-rename: tmux takes
+# the window name from argv[0] of the foreground process group leader. Copilot's
+# entry point is a `#!/usr/bin/env node` script, and the kernel/env rewrite
+# argv[0] to "node" on shebang exec — so the window read "node". Invoking node
+# explicitly lets `exec -a` set argv[0] to "copilot"; `type -P` does a PATH-only
+# lookup so it finds the real script and not this function.
+copilot() {
+  local script
+  script=$(type -P copilot)
+  (
+    unset WAYLAND_DISPLAY
+    export XDG_SESSION_TYPE=x11
+    if [[ -n $script ]] && command -v node >/dev/null; then
+      exec -a copilot node "$script" "$@"
+    fi
+    command copilot "$@"
+  )
+}
 
 # --------------------------- Navigation WORK -------------------------
 alias sdkdir='cd ~/projects/sdk'
