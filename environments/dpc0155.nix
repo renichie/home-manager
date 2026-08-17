@@ -3,6 +3,16 @@ let
   ubuntuElectron = config._module.args.ubuntuElectron or null;
   
   homeDir = config.home.homeDirectory;
+
+  # Link-Name in ~  ->  Pfad relativ zu ~
+  syncSymlinks = {
+    "backups" = ".sync/backup-dpc0155/backups";
+    "documents" = ".sync/backup-dpc0155/documents";
+    "credentials" = ".sync/backup-dpc0155/credentials";
+    "efs-dpc0118.bckp.d" = ".sync/backup-dpc0155/backups/efs-dpc0118";
+    "notizen" = ".sync/share-notizen";
+  };
+
   teamsForLinuxPackage =
     if ubuntuElectron == null then
       pkgs.teams-for-linux
@@ -63,6 +73,22 @@ in
     peek
     ydotool
   ];
+
+  # Syncthing-Ordner: Symlinks nach ~/.sync/<kanonischer-name>/…
+  #
+  # Bewusst als Aktivierungs-Snippet statt über home.file
+  # Preis: home-manager verwaltet sie nicht mit. Ein hier entfernter Eintrag
+  # verschwindet nicht beim nächsten Switch -- dann von Hand löschen.
+  home.activation.syncSymlinks =
+    lib.hm.dag.entryAfter [ "linkGeneration" ] (
+      lib.concatStrings (lib.mapAttrsToList (link: target: ''
+        if [[ -e "${homeDir}/${link}" && ! -L "${homeDir}/${link}" ]]; then
+          echo "[home-manager] ${link} existiert und ist kein Symlink -- übersprungen" >&2
+        else
+          run ${pkgs.coreutils}/bin/ln -sfn "${homeDir}/${target}" "${homeDir}/${link}"
+        fi
+      '') syncSymlinks)
+    );
 
   home.file."bin/chrome-disabled-web-security" = {
     text = ''
