@@ -225,7 +225,7 @@ in
   systemd.user.services.syncthing = {
     Unit = {
       Description = "Syncthing file synchronization service";
-      after = [ "network.target.service" ];
+      After = [ "network.target" ];
     };
     Install = {
       WantedBy = [ "default.target" ];
