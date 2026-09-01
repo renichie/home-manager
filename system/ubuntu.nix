@@ -39,6 +39,8 @@ in
       name = "Nordic"; # Use the dark variant of the Nordic theme
       package = pkgs.nordic;
     };
+    # Keep legacy behavior (gtk4 theme mirrors gtk.theme) explicitly.
+    gtk4.theme = config.gtk.theme;
   };
 
 

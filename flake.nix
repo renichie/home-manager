@@ -23,7 +23,7 @@
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs {
-        inherit system;
+        localSystem = system;
         # Apply the xremap overlay from xremap-flake
         overlays = [
           nixgl.overlay
@@ -45,6 +45,7 @@
               home.stateVersion = "24.11";
 
               # TODO: probably does not belong here!
+              services.xremap.enable = true;
               services.xremap.withX11 = true;
               services.xremap.watch = true;
               services.xremap.yamlConfig = builtins.readFile ./dotfiles/xremap.config.yaml;
@@ -64,6 +65,7 @@
               home.stateVersion = "24.11";
 
               # TODO: probably does not belong here!
+              services.xremap.enable = true;
               services.xremap.withX11 = true;
               services.xremap.watch = true;
               services.xremap.yamlConfig = builtins.readFile ./dotfiles/xremap.config.yaml;

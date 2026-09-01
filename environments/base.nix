@@ -67,7 +67,7 @@ let
         package = pkgs.obsidian;
         executable = "obsidian";
         script = ''
-          exec ${ubuntuElectron.nixGLCommand} ${pkgs.electron_34}/bin/electron --no-sandbox --use-angle=gl ${pkgs.obsidian}/share/obsidian/app.asar "$@"
+          exec ${ubuntuElectron.nixGLCommand} ${pkgs.electron}/bin/electron --no-sandbox --use-angle=gl ${pkgs.obsidian}/share/obsidian/app.asar "$@"
         '';
       };
 in
@@ -147,6 +147,8 @@ in
   programs.home-manager.enable = true;
   programs.bash.enable = true;
   programs.fzf.enable = true;
+  # Atuin owns Ctrl-R for bash history search; disable fzf's binding to avoid the conflict.
+  programs.fzf.historyWidget.command = "";
 
   # might need to migrate this to environment configs at some point
   home.file = {
@@ -200,7 +202,7 @@ in
 
       # Optional quality-of-life
       style = "compact";
-      keymap = "vim-normal"; 
+      keymap_mode = "vim-normal";
     };
   };
 

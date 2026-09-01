@@ -21,7 +21,7 @@ let
         package = pkgs.teams-for-linux;
         executable = "teams-for-linux";
         script = ''
-          exec ${ubuntuElectron.nixGLCommand} ${pkgs.electron_34}/bin/electron --no-sandbox --use-angle=gl ${pkgs.teams-for-linux}/share/teams-for-linux/app.asar "$@"
+          exec ${ubuntuElectron.nixGLCommand} ${pkgs.electron}/bin/electron --no-sandbox --use-angle=gl ${pkgs.teams-for-linux}/share/teams-for-linux/app.asar "$@"
         '';
       };
   vscodePackage =
@@ -67,7 +67,7 @@ in
 
     ### MISC ###
     gimp
-    xfce.thunar
+    thunar
     pandoc
     uv
     peek
