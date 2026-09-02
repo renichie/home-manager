@@ -233,7 +233,7 @@ in
       WantedBy = [ "default.target" ];
     };
     Service = {
-      ExecStart = "${pkgs.syncthing}/bin/syncthing -no-browser -home=${config.home.homeDirectory}/.config/syncthing";
+      ExecStart = "${pkgs.syncthing}/bin/syncthing serve --no-browser --home=${config.home.homeDirectory}/.config/syncthing";
       Restart = "on-failure";
       RestartSec = "10s";
     };
