@@ -59,6 +59,10 @@ let
     complete -F _obsync_completions obsync
   '';
 
+  # Paseo (https://paseo.sh): control plane for coding agents. Not in nixpkgs,
+  # so we build the published npm release ourselves -- see pkgs/paseo/default.nix.
+  paseoPackage = pkgs.callPackage ../pkgs/paseo { };
+
   obsidianPackage =
     if ubuntuElectron == null then
       pkgs.obsidian
@@ -106,6 +110,9 @@ in
 
     ### SHORTCUTS ###
     xremap
+
+    ### AGENTS ###
+    paseoPackage
 
     ### BACKUP ###
     syncthing
@@ -234,6 +241,34 @@ in
     };
     Service = {
       ExecStart = "${pkgs.syncthing}/bin/syncthing serve --no-browser --home=${config.home.homeDirectory}/.config/syncthing";
+      Restart = "on-failure";
+      RestartSec = "10s";
+    };
+  };
+
+  # Paseo daemon -- serves the CLI, the bundled web UI and any paired clients.
+  # Bound to loopback and with the end-to-end encrypted relay off, so reaching
+  # it from another device stays an explicit opt-in: widen --listen (or put a
+  # tunnel/VPN in front) and run `paseo daemon pair`.
+  systemd.user.services.paseo = {
+    Unit = {
+      Description = "Paseo coding agent daemon";
+      After = [ "network.target" ];
+    };
+    Install = {
+      WantedBy = [ "default.target" ];
+    };
+    Service = {
+      Type = "simple";
+      # Paseo only orchestrates agents, it ships none: the provider CLIs must be
+      # reachable from the daemon's PATH. claude, codex and copilot are bun
+      # globals (~/.bun/bin), junie lives in ~/.local/bin -- a login shell picks
+      # both up via .bashrc, a systemd unit does not.
+      Environment = [
+        "PASEO_HOME=${config.home.homeDirectory}/.paseo"
+        "PATH=${config.home.profileDirectory}/bin:${config.home.homeDirectory}/.bun/bin:${config.home.homeDirectory}/.local/bin:/usr/local/bin:/usr/bin:/bin"
+      ];
+      ExecStart = "${paseoPackage}/bin/paseo start --foreground --listen 127.0.0.1:6767 --web-ui --no-relay";
       Restart = "on-failure";
       RestartSec = "10s";
     };
