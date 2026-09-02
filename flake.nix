@@ -17,9 +17,14 @@
 
     # Add the xremap nix-flake input
     xremap-flake.url = "github:xremap/nix-flake";
+
+    # Agent of Empires -- tmux-based session manager for AI coding agents.
+    # Wired into DPC0155/HERA/NYX individually (not base.nix), so any future
+    # environment doesn't get it by default.
+    agent-of-empires.url = "github:agent-of-empires/agent-of-empires";
   };
 
-  outputs = { self, nixpkgs, home-manager, nixgl, xremap-flake, ... }:
+  outputs = { self, nixpkgs, home-manager, nixgl, xremap-flake, agent-of-empires, ... }:
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs {
@@ -34,6 +39,9 @@
       homeConfigurations = {
         DPC0155 = home-manager.lib.homeManagerConfiguration {
           pkgs = pkgs;
+          extraSpecialArgs = {
+            aoePackage = agent-of-empires.packages.${system}.aoe-with-web;
+          };
           modules = [
             ./system/ubuntu.nix
             ./environments/base.nix
@@ -55,6 +63,9 @@
 
         HERA = home-manager.lib.homeManagerConfiguration {
           pkgs = pkgs;
+          extraSpecialArgs = {
+            aoePackage = agent-of-empires.packages.${system}.aoe-with-web;
+          };
           modules = [
             ./environments/base.nix
             ./environments/hera.nix
@@ -75,6 +86,9 @@
 
         NYX = home-manager.lib.homeManagerConfiguration {
           pkgs = pkgs;
+          extraSpecialArgs = {
+            aoePackage = agent-of-empires.packages.${system}.aoe-with-web;
+          };
           modules = [
             ./environments/base.nix
             ./system/manjaro.nix
