@@ -1,0 +1,27 @@
+{
+  "scripts": {
+    "build-dpc0155": {
+      "type": "script",
+      "command": "home-manager build --flake .#DPC0155 --no-out-link"
+    },
+    "build-hera": {
+      "type": "script",
+      "command": "home-manager build --flake .#HERA --no-out-link"
+    },
+    "build-nyx": {
+      "type": "script",
+      "command": "home-manager build --flake .#NYX --no-out-link"
+    }
+  },
+  "metadataGeneration": {
+    "commitMessage": {
+      "instructions": "Follow AGENTS.md: short, descriptive subjects, Conventional Commit style where it fits (e.g. 'feat(sandbox): persist agent stats across sessions'), one concern per commit."
+    },
+    "pullRequest": {
+      "instructions": "Follow AGENTS.md: include a concise summary, the flake target(s) affected, manual verification performed (e.g. 'home-manager build --flake .#<TARGET>' output), and screenshots only when changing visible themes or UI-facing config. Never push, force-push, delete a remote branch, or merge a PR without the user's explicit permission for that specific push, given in the current conversation -- a general instruction like 'deploy this' or 'fix it on development' is not push permission. Prepare the commit/branch/PR locally, then ask e.g. 'Ready to push <commit> to <repo>/<branch> -- soll ich pushen?' and wait for a clear yes; an earlier approved push does not authorize later ones."
+    }
+  },
+  "agentRules": {
+    "neverSwitch": "Agents must never run 'home-manager switch' or 'hm_switch'. Only validate with 'home-manager build --flake .#<TARGET>' and leave applying the profile to the user."
+  }
+}

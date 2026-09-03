@@ -197,10 +197,15 @@ in
     enable = true;
 #    enableBashIntegration = true;   # or enableZshIntegration / enableFishIntegration
 
+    # Background daemon keeps an in-memory index so interactive search
+    # doesn't rescan the whole history db (263k+ entries) on every
+    # keystroke. Without it, search_mode "fuzzy" was hakelig/unresponsive.
+    daemon.enable = true;
+
     settings = {
       auto_sync = true;
       sync_frequency = "10s";
-      search_mode = "fuzzy";
+      search_mode = "daemon-fuzzy";
 
       # Make matches feel “fzf-ish”
       # prefer_exact_match = true;
@@ -209,7 +214,14 @@ in
 
       # Optional quality-of-life
       style = "compact";
-      keymap_mode = "vim-normal";
+
+      # "vim-insert", NOT "vim-normal": with vim-normal the search box opens in
+      # normal mode, so typed letters are vim commands instead of query text --
+      # j/k move the selection, g waits for a second key, i switches to insert.
+      # Typing "git" landed only "t" in the search box. Felt like a multi-second
+      # hang that depended on which letter you started with. vim-insert opens in
+      # insert mode (Esc still gets you to normal mode) so typing just works.
+      keymap_mode = "vim-insert";
     };
   };
 
@@ -247,9 +259,12 @@ in
   };
 
   # Paseo daemon -- serves the CLI, the bundled web UI and any paired clients.
-  # Bound to loopback and with the end-to-end encrypted relay off, so reaching
-  # it from another device stays an explicit opt-in: widen --listen (or put a
-  # tunnel/VPN in front) and run `paseo daemon pair`.
+  # Bound to loopback; relay is intentionally NOT pinned here with --no-relay
+  # (that flag becomes a "launch override" that locks out `paseo daemon pair`/
+  # the config API -- see DaemonRpcError: "Relay is controlled by a daemon
+  # launch override"). Toggle the relay at runtime instead: `paseo daemon pair`
+  # or edit ~/.paseo/config.json's daemon.relay.enabled, then restart the
+  # service to pick it up.
   systemd.user.services.paseo = {
     Unit = {
       Description = "Paseo coding agent daemon";
@@ -268,7 +283,7 @@ in
         "PASEO_HOME=${config.home.homeDirectory}/.paseo"
         "PATH=${config.home.profileDirectory}/bin:${config.home.homeDirectory}/.bun/bin:${config.home.homeDirectory}/.local/bin:/usr/local/bin:/usr/bin:/bin"
       ];
-      ExecStart = "${paseoPackage}/bin/paseo start --foreground --listen 127.0.0.1:6767 --web-ui --no-relay";
+      ExecStart = "${paseoPackage}/bin/paseo start --foreground --listen 127.0.0.1:6767 --web-ui";
       Restart = "on-failure";
       RestartSec = "10s";
     };

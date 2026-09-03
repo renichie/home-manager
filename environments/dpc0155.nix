@@ -1,6 +1,8 @@
 { config, lib, pkgs, aoePackage, ... }:
 let
   ubuntuElectron = config._module.args.ubuntuElectron or null;
+
+  paseoDesktopPackage = pkgs.callPackage ../pkgs/paseo-desktop { };
   
   homeDir = config.home.homeDirectory;
 
@@ -58,6 +60,7 @@ in
 
     ### DEVELOPMENT PACKAGES ###
     aoePackage # Agent of Empires (aoe) -- tmux session manager for AI coding agents, built with the web dashboard
+    paseoDesktopPackage # Paseo desktop client (GUI for the paseo daemon from base.nix)
     gh
     nodejs_22
     maven
