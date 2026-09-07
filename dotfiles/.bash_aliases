@@ -21,6 +21,7 @@ alias glg='git lg1 --all'
 alias gdc='git diff --cached'
 gitall() {
   local max_repo_depth="2"
+  local only_changed=0
 
   case "${1:-}" in
     -h|--help|"")
@@ -29,11 +30,14 @@ gitall - führt einen beliebigen git-Befehl in allen Git-Repositories unterhalb
 des aktuellen Verzeichnisses aus.
 
 Verwendung:
-  gitall [--depth N | --depth=N] <git-subcommand> [args...]
+  gitall [--depth N | --depth=N] [--only-changed] <git-subcommand> [args...]
 
 Optionen:
-  --depth N    Maximale Repo-Tiefe relativ zum aktuellen Verzeichnis.
-  --depth=N    Standard ist 2. Beispiel: 0 = nur aktuelles Repo, 1 = direkte Unterordner.
+  --depth N        Maximale Repo-Tiefe relativ zum aktuellen Verzeichnis.
+  --depth=N        Standard ist 2. Beispiel: 0 = nur aktuelles Repo, 1 = direkte Unterordner.
+  --only-changed   Zeigt nur Repos mit tatsächlichen Änderungen/Ergebnissen.
+                   Bei "status": versteckt Repos, die sauber und up to date sind.
+                   Bei anderen Subcommands: versteckt Repos ohne Ausgabe.
 EOF
       [ -z "${1:-}" ] && return 1 || return 0
       ;;
@@ -51,6 +55,10 @@ EOF
         ;;
       --depth=*)
         max_repo_depth="${1#--depth=}"
+        shift
+        ;;
+      --only-changed)
+        only_changed=1
         shift
         ;;
       --)
@@ -83,10 +91,35 @@ EOF
   fi
   find_cmd+=(-type d -name .git -prune)
 
+  local dir_color
+  dir_color="$(printf ':%s:' "${LS_COLORS:-}" | sed -n 's/.*:di=\([^:]*\):.*/\1/p')"
+  dir_color="${dir_color:-01;34}"
+
+  local subcmd="$1"
+
   "${find_cmd[@]}" | while read -r gitdir; do
     repo="${gitdir%/.git}"
-    printf '===== %s =====\n' "$repo"
-    git -C "$repo" --no-pager -c color.ui=always "$@"
+    local output
+    output="$(git -C "$repo" --no-pager -c color.ui=always "$@" 2>&1)"
+
+    if [[ "$only_changed" -eq 1 ]]; then
+      local plain
+      plain="$(printf '%s' "$output" | sed -r 's/\x1B\[[0-9;]*[a-zA-Z]//g')"
+      if [[ "$subcmd" == "status" ]]; then
+        # Sauber & up to date (kein "ahead"/"behind"/"diverged") -> überspringen.
+        if [[ "$plain" == *"nothing to commit, working tree clean"* \
+          && "$plain" != *"ahead of"* \
+          && "$plain" != *"behind"* \
+          && "$plain" != *"diverged"* ]]; then
+          continue
+        fi
+      elif [[ -z "$plain" ]]; then
+        continue
+      fi
+    fi
+
+    printf '===== \033[%sm%s\033[0m =====\n' "$dir_color" "$repo"
+    printf '%s\n' "$output"
     printf '\n'
   done
 }

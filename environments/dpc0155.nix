@@ -145,6 +145,53 @@ in
       fi
     '';
 
+  # Junie's Brave selector is exposed as an ACP configuration option, not the
+  # generic session/set_mode RPC that Paseo otherwise uses for derived modes.
+  home.activation.configurePaseoJunie =
+    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      paseo_config="$HOME/.paseo/config.json"
+      paseo_config_dir="${config.home.homeDirectory}/.paseo"
+      mkdir -p "$paseo_config_dir"
+
+      if [[ -f "$paseo_config" ]]; then
+        ${pkgs.jq}/bin/jq '
+          .agents = (.agents // {}) |
+          .agents.providers = (.agents.providers // {}) |
+          .agents.providers.junie = ((.agents.providers.junie // {}) + {
+            extends: "acp",
+            label: "Junie",
+            description: "AI Coding Agent by JetBrains",
+            command: [ "junie", "--acp", "true" ]
+          }) |
+          .agents.providers.junie.params =
+            ((.agents.providers.junie.params // {}) + {
+              modeConfigOptionId: "brave_mode"
+            })
+        ' "$paseo_config" > "$paseo_config.tmp"
+      else
+        ${pkgs.jq}/bin/jq -n '
+          {
+            version: 1,
+            agents: {
+              providers: {
+                junie: {
+                  extends: "acp",
+                  label: "Junie",
+                  description: "AI Coding Agent by JetBrains",
+                  command: [ "junie", "--acp", "true" ],
+                  params: {
+                    modeConfigOptionId: "brave_mode"
+                  }
+                }
+              }
+            }
+          }
+        ' > "$paseo_config.tmp"
+      fi
+
+      mv "$paseo_config.tmp" "$paseo_config"
+    '';
+
   # Agent of Empires web dashboard. Port is not fixed by the tool -- it
   # defaults to 8080 and can be overridden with --port; bound to
   # 127.0.0.1 only (add --host/--remote if you ever need it reachable

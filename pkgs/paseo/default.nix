@@ -23,7 +23,11 @@ buildNpmPackage rec {
   # Only the two manifests matter; the actual code comes from the npm registry.
   src = lib.fileset.toSource {
     root = ./.;
-    fileset = lib.fileset.unions [ ./package.json ./package-lock.json ];
+    fileset = lib.fileset.unions [
+      ./package.json
+      ./package-lock.json
+      ./patches/junie-acp-mode-config-option.patch
+    ];
   };
 
   npmDepsHash = "sha256-pGv7r+fB4erZchO+sxTu5ebVyxMUAMPq8p+1OiwJJXY=";
@@ -40,6 +44,9 @@ buildNpmPackage rec {
 
     mkdir -p $out/lib/paseo
     cp -r node_modules package.json $out/lib/paseo/
+
+    patch --batch --forward -d $out/lib/paseo -p1 \
+      < ${./patches/junie-acp-mode-config-option.patch}
 
     # Mirrors the upstream bin/paseo shim, which runs dist/index.js with the
     # DEP0040 (punycode) warning silenced.
