@@ -161,6 +161,7 @@ in
   home.file = {
     ".bashrc".source = lib.mkForce "${dotfilesDir}/.bashrc";
     ".bash_aliases".source = lib.mkForce "${dotfilesDir}/.bash_aliases";
+    ".bash_functions".source = lib.mkForce "${dotfilesDir}/.bash_functions";
 
     # bash-preexec: required by atuin on bash to record commands + cwd.
     # Must be sourced before `atuin init bash` in .bashrc (directory search

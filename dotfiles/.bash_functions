@@ -1,0 +1,153 @@
+# Größere/komplexere Shell-Funktionen leben hier statt in .bash_aliases,
+# damit einfache Aliase dort übersichtlich bleiben. Wird von .bashrc
+# eingebunden. Einfache `alias foo=bar` gehören weiterhin in .bash_aliases.
+
+# ------------------------------ Git ---------------------------------
+gitall() {
+  local max_repo_depth="2"
+  local only_changed=0
+
+  case "${1:-}" in
+    -h|--help|"")
+      cat <<'EOF'
+gitall - führt einen beliebigen git-Befehl in allen Git-Repositories unterhalb
+des aktuellen Verzeichnisses aus.
+
+Verwendung:
+  gitall [--depth N | --depth=N] [--only-changed] <git-subcommand> [args...]
+
+Optionen:
+  --depth N        Maximale Repo-Tiefe relativ zum aktuellen Verzeichnis.
+  --depth=N        Standard ist 2. Beispiel: 0 = nur aktuelles Repo, 1 = direkte Unterordner.
+  --only-changed   Zeigt nur Repos mit tatsächlichen Änderungen/Ergebnissen.
+                   Bei "status": versteckt Repos, die sauber und up to date sind.
+                   Bei anderen Subcommands: versteckt Repos ohne Ausgabe.
+EOF
+      [ -z "${1:-}" ] && return 1 || return 0
+      ;;
+  esac
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --depth)
+        if [[ -z "${2:-}" ]]; then
+          printf 'Option --depth requires a value.\n' >&2
+          return 1
+        fi
+        max_repo_depth="$2"
+        shift 2
+        ;;
+      --depth=*)
+        max_repo_depth="${1#--depth=}"
+        shift
+        ;;
+      --only-changed)
+        only_changed=1
+        shift
+        ;;
+      --)
+        shift
+        break
+        ;;
+      -*)
+        printf 'Unknown option: %s\n' "$1" >&2
+        return 1
+        ;;
+      *)
+        break
+        ;;
+    esac
+  done
+
+  if [[ -z "${1:-}" ]]; then
+    printf 'Usage: gitall [--depth N | --depth=N] <git-subcommand> [args...]\n' >&2
+    return 1
+  fi
+
+  if [[ -n "$max_repo_depth" && ! "$max_repo_depth" =~ ^[0-9]+$ ]]; then
+    printf 'Option --depth must be a non-negative integer.\n' >&2
+    return 1
+  fi
+
+  local -a find_cmd=(find .)
+  if [[ -n "$max_repo_depth" ]]; then
+    find_cmd+=(-maxdepth "$((max_repo_depth + 1))")
+  fi
+  find_cmd+=(-type d -name .git -prune)
+
+  local dir_color
+  dir_color="$(printf ':%s:' "${LS_COLORS:-}" | sed -n 's/.*:di=\([^:]*\):.*/\1/p')"
+  dir_color="${dir_color:-01;34}"
+
+  local subcmd="$1"
+
+  "${find_cmd[@]}" | while read -r gitdir; do
+    repo="${gitdir%/.git}"
+    local output
+    output="$(git -C "$repo" --no-pager -c color.ui=always "$@" 2>&1)"
+
+    if [[ "$only_changed" -eq 1 ]]; then
+      local plain
+      plain="$(printf '%s' "$output" | sed -r 's/\x1B\[[0-9;]*[a-zA-Z]//g')"
+      if [[ "$subcmd" == "status" ]]; then
+        # Sauber & up to date (kein "ahead"/"behind"/"diverged") -> überspringen.
+        if [[ "$plain" == *"nothing to commit, working tree clean"* \
+          && "$plain" != *"ahead of"* \
+          && "$plain" != *"behind"* \
+          && "$plain" != *"diverged"* ]]; then
+          continue
+        fi
+      elif [[ -z "$plain" ]]; then
+        continue
+      fi
+    fi
+
+    printf '===== \033[%sm%s\033[0m =====\n' "$dir_color" "$repo"
+    printf '%s\n' "$output"
+    printf '\n'
+  done
+}
+
+# ------------------------- AI Agent Sandbox --------------------------
+# Shell functions (not aliases) so arguments pass through cleanly.
+# Usage: copilot / codex / junie run plain on the host; *-sandboxed for sandboxed yolo.
+# "$(pwd -P)" instead of "$PWD": after the cwd is renamed, bash keeps the stale
+# logical path in $PWD; pwd -P always yields the physical, existing path.
+sbx()               { ~/.local/bin/agent-sandbox.sh "$(pwd -P)" "$@"; }
+sbx-copilot()       { ~/.local/bin/agent-sandbox.sh "$(pwd -P)" copilot "$@"; }
+sbx-copilot-yolo()  { ~/.local/bin/agent-sandbox.sh "$(pwd -P)" copilot --allow-all "$@"; }
+sbx-codex()         { ~/.local/bin/agent-sandbox.sh "$(pwd -P)" codex "$@"; }
+sbx-codex-yolo()    { ~/.local/bin/agent-sandbox.sh "$(pwd -P)" codex --dangerously-bypass-approvals-and-sandbox "$@"; }
+sbx-junie()         { ~/.local/bin/agent-sandbox.sh "$(pwd -P)" junie "$@"; }
+sbx-junie-yolo()    { ~/.local/bin/agent-sandbox.sh "$(pwd -P)" junie --brave "$@"; }
+sbx-nonet()         { NO_NET=1 ~/.local/bin/agent-sandbox.sh "$(pwd -P)" "$@"; }
+copilot-sandboxed() { sbx-copilot-yolo "$@"; }
+codex-sandboxed()   { sbx-codex-yolo "$@"; }
+junie-sandboxed()   { sbx-junie-yolo "$@"; }
+
+# Copilot CLI's bundled clipboard-rs reads images via the wlr-data-control /
+# ext-data-control Wayland protocol, which GNOME/Mutter does not implement
+# (deliberately, over clipboard-snooping concerns) — so image paste silently
+# fails on a plain GNOME Wayland session. XWayland's classic X11 selection
+# path works and also carries images copied from native Wayland apps, so
+# force that path (unset, not empty-string, or clipboard-rs still detects a
+# Wayland env). Same fix already applied to sbx-copilot via agent-sandbox.sh.
+#
+# The `exec -a copilot node <script>` is for tmux's automatic-rename: tmux takes
+# the window name from argv[0] of the foreground process group leader. Copilot's
+# entry point is a `#!/usr/bin/env node` script, and the kernel/env rewrite
+# argv[0] to "node" on shebang exec — so the window read "node". Invoking node
+# explicitly lets `exec -a` set argv[0] to "copilot"; `type -P` does a PATH-only
+# lookup so it finds the real script and not this function.
+copilot() {
+  local script
+  script=$(type -P copilot)
+  (
+    unset WAYLAND_DISPLAY
+    export XDG_SESSION_TYPE=x11
+    if [[ -n $script ]] && command -v node >/dev/null; then
+      exec -a copilot node "$script" "$@"
+    fi
+    command copilot "$@"
+  )
+}

@@ -30,6 +30,11 @@ if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
+# Larger/complex shell functions (kept out of .bash_aliases for readability).
+if [ -f ~/.bash_functions ]; then
+    . ~/.bash_functions
+fi
+
 # enable color support of ls and also add handy aliases
 if [ "$TERM" != "dumb" ] && [ -x /usr/bin/dircolors ]; then
     eval "`dircolors -b`"
