@@ -48,7 +48,7 @@ in
     vscodePackage
 
     ### CLOUD ### 
-    azure-cli
+    (azure-cli.withExtensions [ azure-cli-extensions.azure-devops ])
     fluxcd
     kubectl
     kubernetes-helm

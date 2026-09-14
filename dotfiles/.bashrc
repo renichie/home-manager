@@ -115,6 +115,8 @@ alias la='ls -A'
 alias l='ls -CF'
 
 alias hswitch='home-manager switch --flake ~/.config/home-manager#dpc0155 -b bckp'
+alias confs='cd ~/.config/home-manager'
+alias config='cd ~/.config/home-manager'
 
 ####################################### KUBECTL #########################################
 
