@@ -53,6 +53,15 @@ eval "$(oh-my-posh init bash --config=$HOME/.poshthemes/theme.omp.json)"
 eval "$(atuin init bash --disable-up-arrow)"
 eval "$(atuin gen-completions --shell bash)"
 
+# AI provider quota indicator. bash-preexec runs precmd_functions before the
+# leftover PROMPT_COMMAND (which is where oh-my-posh's hook ended up), so the
+# env var is refreshed before the prompt that reads it is rendered. The preexec
+# hook flags agent invocations so the prompt right after one is already correct.
+if [[ -x ~/.local/bin/ai-credits ]]; then
+    preexec_functions+=(_ai_credits_preexec)
+    precmd_functions+=(_ai_credits_env)
+fi
+
 # don't put duplicate lines in the history. See bash(1) for more options
 export HISTCONTROL=ignoredups
 # ... and ignore same successive entries.

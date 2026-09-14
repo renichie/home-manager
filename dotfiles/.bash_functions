@@ -125,6 +125,59 @@ copilot-sandboxed() { sbx-copilot-yolo "$@"; }
 codex-sandboxed()   { sbx-codex-yolo "$@"; }
 junie-sandboxed()   { sbx-junie-yolo "$@"; }
 
+# ------------------------- AI quota prompt segment -------------------------
+# Feeds $AI_CREDITS, which the oh-my-posh theme renders as a text segment.
+#
+# The quota only moves when an agent runs, so the refresh is event-driven rather
+# than purely time-driven: _ai_credits_preexec flags agent commands, and the
+# next prompt refreshes synchronously so the corrected number is on the very
+# first prompt after the agent exits. AI_CREDITS_TTL is only the fallback for
+# drift caused elsewhere (another pane, an IDE, a second machine).
+#
+# The common path must not fork: the value is pre-rendered by `ai-credits
+# --refresh` into ~/.cache/ai-credits.prompt as "<epoch> <string>" and read here
+# with builtins only.
+AI_CREDITS_TTL=${AI_CREDITS_TTL:-300}
+AI_CREDITS_SYNC_TIMEOUT=${AI_CREDITS_SYNC_TIMEOUT:-4}
+# First word of a command line that spends quota. Anchored, so `git commit` and
+# `grep codex ...` do not match.
+AI_CREDITS_AGENTS='^(codex|claude|copilot|junie|opencode|gemini|sbx|sbx-[a-z-]+|(copilot|codex|junie)-sandboxed)([[:space:]]|$)'
+
+_ai_credits_preexec() {
+  [[ $1 =~ $AI_CREDITS_AGENTS ]] && _ai_credits_dirty=1
+  return 0
+}
+
+_ai_credits_env() {
+  local cache="${XDG_CACHE_HOME:-$HOME/.cache}/ai-credits.prompt"
+  local stamp now
+
+  if [[ -n ${_ai_credits_dirty:-} ]]; then
+    # An agent just exited and its usage is already booked. Block briefly so the
+    # next prompt is correct instead of showing a stale number until the one
+    # after it. Bounded, so a dead network cannot wedge the prompt.
+    unset _ai_credits_dirty
+    timeout "$AI_CREDITS_SYNC_TIMEOUT" ai-credits --refresh >/dev/null 2>&1
+  fi
+
+  AI_CREDITS=""
+  if [[ -r $cache ]]; then
+    read -r stamp AI_CREDITS < "$cache"
+  else
+    stamp=0
+  fi
+  export AI_CREDITS
+
+  printf -v now '%(%s)T' -1
+  if (( now - stamp > AI_CREDITS_TTL )); then
+    # Stamp the file first so concurrent shells don't all spawn a refresh.
+    printf '%s %s\n' "$now" "$AI_CREDITS" > "$cache" 2>/dev/null
+    # Subshell-then-background: detaches without leaving a job whose completion
+    # bash would announce over the prompt.
+    ( ai-credits --refresh >/dev/null 2>&1 & )
+  fi
+}
+
 # Copilot CLI's bundled clipboard-rs reads images via the wlr-data-control /
 # ext-data-control Wayland protocol, which GNOME/Mutter does not implement
 # (deliberately, over clipboard-snooping concerns) — so image paste silently

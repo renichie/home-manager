@@ -63,14 +63,24 @@
       "segments": [
         {
           "background": "transparent",
+          "foreground": "#6C6C6C",
+          "style": "plain",
+          "template": "{{ if .Env.AI_CREDITS }}{{ .Env.AI_CREDITS }}  {{ end }}",
+          "type": "text",
+          "min_width": 126
+        },
+        {
+          "background": "transparent",
           "foreground": "#4285F4",
           "style": "plain",
-          "powerline_symbol": "",
+          "powerline_symbol": "",
           "template": "\u2388 {{.Context}}{{if .Namespace}} \uf061 {{.Namespace}}{{end}}",
-          "type": "kubectl"
+          "type": "kubectl",
+          "min_width": 80
         }
       ],
-      "type": "prompt"
+      "type": "prompt",
+      "overflow": "hide"
     },
     {
       "alignment": "left",

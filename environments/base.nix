@@ -175,6 +175,13 @@ in
       source = "${scriptfilesDir}/agent-sandbox.sh";
       executable = true;
     };
+
+    # AI provider quota overview (Copilot / Codex / Claude / JetBrains AI).
+    # Also feeds the $AI_CREDITS prompt segment via ~/.cache/ai-credits.prompt.
+    ".local/bin/ai-credits" = {
+      source = "${scriptfilesDir}/ai-credits.py";
+      executable = true;
+    };
     ".vimrc".source = lib.mkForce "${dotfilesDir}/.vimrc";
     ".config/nvim/init.vim".source = lib.mkForce "${dotfilesDir}/init.vim";
     ".ideavimrc".source = "${dotfilesDir}/.vimrc";
