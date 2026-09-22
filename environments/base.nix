@@ -122,6 +122,7 @@ in
     ### UTILITY ###
     fzf
     xsel
+    xclip # needed by claude/opencode TUIs for X11 clipboard image paste (they call xclip directly, not xsel)
     wl-clipboard
     vlc
     keepassxc

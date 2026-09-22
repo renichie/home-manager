@@ -69,7 +69,11 @@ in
     jq
     bun # needs `export PATH="$HOME/.bun/bin:$PATH"` for global installs
 
+    ### SHELL ###
+    blesh
+
     ### MISC ###
+    flameshot
     gimp
     thunar
     pandoc
@@ -101,6 +105,54 @@ in
     '';
     executable = true;
   };
+
+  home.file.".blerc".text = ''
+    bleopt default_keymap=vi
+    ble-bind -m vi_imap -f 'C-c' discard-line
+    ble-bind -m vi_nmap -f 'C-c' discard-line
+
+    function ble/prompt/backslash:tmux-vi-mode {
+      [[ $TMUX && $TMUX_PANE ]] || return 0
+
+      local mode label
+      ble/keymap:vi/script/get-mode
+      case $mode in
+        (i*) label=INSERT ;;
+        (R*) label=REPLACE ;;
+        (*n) label=NORMAL ;;
+        (*x) label=VISUAL ;;
+        (*s) label=SELECT ;;
+        (*c) label=COMMAND ;;
+        (*) label=VI ;;
+      esac
+
+      [[ $label == $_ble_tmux_vi_mode ]] && return 0
+      _ble_tmux_vi_mode=$label
+      tmux set-option -p -t "$TMUX_PANE" @ble_mode "$label" 2>/dev/null
+    }
+    function ble/tmux-vi-mode/setup {
+      bleopt keymap_vi_mode_show=
+      bleopt prompt_vi_mode_indicator='\q{tmux-vi-mode}'
+    }
+    blehook/eval-after-load keymap_vi ble/tmux-vi-mode/setup
+
+    # Match the right-shifted navigation in .vimrc.
+    ble-bind -m vi_nmap -f 'j' 'vi-command/backward-char'
+    ble-bind -m vi_nmap -f 'k' 'vi-command/forward-line'
+    ble-bind -m vi_nmap -f 'l' 'vi-command/backward-line'
+    ble-bind -m vi_nmap -f 'ö' 'vi-command/forward-char'
+    ble-bind -m vi_nmap -f ';' 'vi-command/forward-char'
+    ble-bind -m vi_xmap -f 'j' 'vi-command/backward-char'
+    ble-bind -m vi_xmap -f 'k' 'vi-command/forward-line'
+    ble-bind -m vi_xmap -f 'l' 'vi-command/backward-line'
+    ble-bind -m vi_xmap -f 'ö' 'vi-command/forward-char'
+    ble-bind -m vi_xmap -f ';' 'vi-command/forward-char'
+
+    ble-import contrib/scheme/catppuccin_mocha
+    ble/contrib/scheme:catppuccin_mocha/initialize
+    ble-face -s auto_complete 'fg=%custom8,italic'
+    ble-face -s disabled 'fg=%custom10'
+  '';
 
   # Copy theme files into k9s skins directory.
   home.file.".config/k9s/skins" = {

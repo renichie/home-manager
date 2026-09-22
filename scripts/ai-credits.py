@@ -30,10 +30,16 @@ Providers and where the numbers come from:
             to it rather than as its own row. The endpoint rate-limits hard,
             see AI_CREDITS_TTL.
 
-  junie     JetBrains AI credits, read from the IDE's own cache at
-            ~/.config/JetBrains/<IDE>/options/AIAssistantQuotaManager2.xml.
-            No network call. Only refreshed while an IDE is running, so this is
-            a last-known value, not live.
+  junie     JetBrains AI credits. The live number comes from Junie CLI's own
+            session logs (~/.junie/sessions/*/events.jsonl), which get a fresh
+            balance appended after every completed model call regardless of
+            whether an IDE is open. No network call. The total pool size comes
+            from the IDE's cache at
+            ~/.config/JetBrains/<IDE>/options/AIAssistantQuotaManager2.xml,
+            which changes far less often than the balance does. If no Junie
+            CLI session ever logged a balance, this falls back to that same
+            IDE cache for the remaining figure too -- in which case it really
+            is only a last-known value, not live.
 
   anthropic Anthropic API key throughput limits, from the anthropic-ratelimit-*
             response headers. There is no balance endpoint for a normal
@@ -179,6 +185,33 @@ def rel_age(epoch: float) -> str:
     if delta >= 3600:
         return f"{delta / 3600:.0f}h"
     return f"{delta / 60:.0f}m"
+
+
+def reverse_lines(path: str, chunk_size: int = 65536):
+    """Yield a text file's lines back to front, without loading it all into memory.
+
+    Junie's session logs are JSON-Lines and can run to tens of megabytes; the
+    only thing ever needed from them is the most recent match for something, so
+    reading forward and keeping the last hit would mean scanning the whole file
+    every time. This walks backwards in fixed-size chunks instead, stopping as
+    soon as the caller has what it needs.
+    """
+    with open(path, "rb") as fh:
+        fh.seek(0, os.SEEK_END)
+        pos = fh.tell()
+        trailing = b""
+        while pos > 0:
+            read_size = min(chunk_size, pos)
+            pos -= read_size
+            fh.seek(pos)
+            chunk = fh.read(read_size) + trailing
+            lines = chunk.split(b"\n")
+            trailing = lines[0]
+            for line in reversed(lines[1:]):
+                if line:
+                    yield line.decode("utf-8", "replace")
+        if trailing:
+            yield trailing.decode("utf-8", "replace")
 
 
 def iso_to_epoch(value: str | None) -> float | None:
@@ -413,15 +446,39 @@ def fetch_claude() -> dict:
     )
 
 
-def fetch_junie() -> dict:
-    label, short = "JetBrains AI", "jb"
+# The IDE's XML and Junie CLI's session logs both store quota in the same
+# internal raw unit, not the "credits" the IDE's own panels (Junie's License &
+# quota tab, the AI Assistant balance) show. Empirically the ratio is fixed at
+# 128000 raw units per credit -- checked by comparing the XML's available/
+# maximum against the credit balance Junie displayed at the same instant
+# (6,370,803.36 raw / 128000 = 49.77, matching the panel to the cent). Without
+# dividing out, the table shows numbers a thousand times too large.
+JUNIE_RAW_UNITS_PER_CREDIT = 128000
+# How many of the most-recently-touched session logs to check for a live
+# balance before giving up on it. Bounds the work on hosts with a long Junie
+# history; a session nobody has touched in days cannot hold the newest figure.
+JUNIE_SESSION_SCAN_LIMIT = 8
+# How far to walk backwards into a single session log looking for a quota
+# entry before moving on. Long stretches of pure chat/tool-call events without
+# a completed model call are normal; this just stops a pathological file (one
+# that never logged a quota at all) from being read in full every refresh.
+JUNIE_LINE_SCAN_LIMIT = 20000
+
+
+def _junie_xml_info() -> dict | None:
+    """Total credit pool (plus a last-known remaining/mtime as fallback), read
+    from AI Assistant's own cache. This file is only rewritten while an IDE is
+    running, so `remaining`/`mtime` here can be badly stale if quota was spent
+    through Junie CLI instead -- kept only as the total-pool source and as a
+    fallback for hosts with no Junie CLI session logs to read a live balance
+    from at all.
+    """
     pattern = os.path.join(
         HOME, ".config", "JetBrains", "*", "options", "AIAssistantQuotaManager2.xml"
     )
     files = sorted(glob.glob(pattern), key=os.path.getmtime)
     if not files:
-        return result("junie", label, short, "error", note="no IDE quota cache found")
-
+        return None
     path = files[-1]
     try:
         root = ET.parse(path).getroot()
@@ -429,44 +486,116 @@ def fetch_junie() -> dict:
         options = {
             opt.get("name"): json.loads(opt.get("value") or "null") for opt in root.iter("option")
         }
-    except Exception as exc:
-        return result("junie", label, short, "error", note=f"parse failed: {exc}"[:80])
-
-    quota = options.get("quotaInfo") or {}
-    tariff = quota.get("tariffQuota") or quota
-    # Careful: "current" is the amount *consumed*, "available" is what is left.
-    # They always sum to "maximum", and "current" grows as the quota is spent.
-    try:
-        remaining = float(tariff["available"])
+        quota = options.get("quotaInfo") or {}
+        tariff = quota.get("tariffQuota") or quota
+        # Careful: "current" is the amount *consumed*, "available" is what is
+        # left. They always sum to "maximum", and "current" grows as spent.
         total = float(tariff["maximum"])
-    except (KeyError, TypeError, ValueError):
-        return result("junie", label, short, "error", note=f"no quota in {os.path.basename(path)}")
+        remaining = float(tariff["available"])
+    except Exception:
+        return None
     if total <= 0:
-        return result("junie", label, short, "error", note="quota maximum is zero")
+        return None
+    return {
+        "total": total / JUNIE_RAW_UNITS_PER_CREDIT,
+        "remaining": remaining / JUNIE_RAW_UNITS_PER_CREDIT,
+        "source": path.split(os.sep)[-3],
+        "mtime": os.path.getmtime(path),
+        "next_refill": iso_to_epoch((options.get("nextRefill") or {}).get("next")),
+    }
 
-    # The XML stores quota in an internal raw unit, not the "credits" the IDE's
-    # own panels (Junie's License & quota tab, the AI Assistant balance) show.
-    # Empirically the ratio is fixed at 128000 raw units per credit -- checked
-    # by comparing this file's available/maximum against the credit balance
-    # Junie displayed at the same instant (6,370,803.36 raw / 128000 = 49.77,
-    # matching the panel to the cent). Without dividing out, the table shows
-    # numbers a thousand times too large and useless to a human.
-    JUNIE_RAW_UNITS_PER_CREDIT = 128000
-    remaining /= JUNIE_RAW_UNITS_PER_CREDIT
-    total /= JUNIE_RAW_UNITS_PER_CREDIT
 
-    notes = [f"from {path.split(os.sep)[-3]}"]
-    # This file is only rewritten while an IDE runs, so flag a value gone cold.
-    mtime = os.path.getmtime(path)
-    if time.time() - mtime > 3600:
-        notes.append(f"cached {rel_age(mtime)} ago")
+def _completion_quota(event: object) -> tuple[float, float] | None:
+    """Dig a `completion.quota.balanceLeft` (raw units) + `endedAtMs` out of one
+    decoded Junie session-log line, wherever it is nested in that event's shape.
+    """
+    if isinstance(event, dict):
+        completion = event.get("completion")
+        if isinstance(completion, dict):
+            quota = completion.get("quota")
+            if isinstance(quota, dict) and "balanceLeft" in quota:
+                try:
+                    return float(completion.get("endedAtMs") or 0), float(quota["balanceLeft"])
+                except (TypeError, ValueError):
+                    pass
+        for value in event.values():
+            found = _completion_quota(value)
+            if found:
+                return found
+    elif isinstance(event, list):
+        for value in event:
+            found = _completion_quota(value)
+            if found:
+                return found
+    return None
+
+
+def _junie_live_balance() -> tuple[float, float, str] | None:
+    """Most recent credit balance Junie CLI logged after finishing a model call,
+    across every session on this host (started from the IDE or the CLI, does
+    not matter -- both append to the same session log format). Updates on every
+    completion, so it stays live even while no IDE is open. Returns
+    (credits_remaining, ended_at_epoch, session_name), or None if nothing
+    turned up within the scan limits above.
+    """
+    pattern = os.path.join(HOME, ".junie", "sessions", "*", "events.jsonl")
+    files = sorted(glob.glob(pattern), key=os.path.getmtime, reverse=True)
+    best = None
+    for path in files[:JUNIE_SESSION_SCAN_LIMIT]:
+        try:
+            for scanned, line in enumerate(reverse_lines(path), start=1):
+                if scanned > JUNIE_LINE_SCAN_LIMIT:
+                    break
+                if "balanceLeft" not in line:
+                    continue
+                try:
+                    event = json.loads(line)
+                except (json.JSONDecodeError, ValueError):
+                    continue
+                found = _completion_quota(event)
+                if not found:
+                    continue
+                ended_ms, raw = found
+                ended_at = ended_ms / 1000
+                if best is None or ended_at > best[1]:
+                    session = os.path.basename(os.path.dirname(path))
+                    best = (raw / JUNIE_RAW_UNITS_PER_CREDIT, ended_at, session)
+                break  # first match walking backwards is this file's latest
+        except OSError:
+            continue
+    return best
+
+
+def fetch_junie() -> dict:
+    label, short = "JetBrains AI", "jb"
+    xml_info = _junie_xml_info()
+    live = _junie_live_balance()
+    if live is None and xml_info is None:
+        return result("junie", label, short, "error", note="no quota data found")
+
+    total = xml_info["total"] if xml_info else None
+    reset = xml_info["next_refill"] if xml_info else None
+
+    if live is not None:
+        remaining, ended_at, session = live
+        notes = [f"live \u00b7 session {session}"]
+        if time.time() - ended_at > 3600:
+            notes.append(f"last completion {rel_age(ended_at)} ago")
+    else:
+        # No Junie CLI session log had a quota entry at all (e.g. this host
+        # only ever used AI Assistant inside the IDE) -- fall back to the old
+        # IDE-cache value, same as before this live path existed.
+        remaining = xml_info["remaining"]
+        notes = [f"from {xml_info['source']} (IDE cache, not live)"]
+        if time.time() - xml_info["mtime"] > 3600:
+            notes.append(f"cached {rel_age(xml_info['mtime'])} ago")
 
     return result(
         "junie", label, short, "ok",
-        pct=remaining / total * 100,
+        pct=remaining / total * 100 if total else None,
         remaining=remaining,
         total=total,
-        reset=iso_to_epoch((options.get("nextRefill") or {}).get("next")),
+        reset=reset,
         scope="credits",
         note=" \u00b7 ".join(notes),
     )
@@ -564,7 +693,7 @@ def collect(probe_api: bool) -> dict:
         (os.path.exists(os.path.join(HOME, ".claude", ".credentials.json")), fetch_claude),
         (bool(glob.glob(os.path.join(
             HOME, ".config", "JetBrains", "*", "options", "AIAssistantQuotaManager2.xml"
-        ))), fetch_junie),
+        )) or glob.glob(os.path.join(HOME, ".junie", "sessions", "*", "events.jsonl"))), fetch_junie),
     ]
     fetchers = [fn for installed, fn in candidates if installed]
     if probe_api:

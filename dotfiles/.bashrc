@@ -12,6 +12,10 @@ reload-hotkeys() {
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
 
+# Load ble.sh without attaching yet so existing hooks and bindings initialize first.
+if command -v blesh-share &>/dev/null; then
+    source -- "$(blesh-share)/ble.sh" --attach=none
+fi
 
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
@@ -465,3 +469,5 @@ _git_prune_local_branches_completion() {
 }
 
 complete -F _git_prune_local_branches_completion git-prune-local-branches
+
+[[ ! ${BLE_VERSION-} ]] || ble-attach
