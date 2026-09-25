@@ -69,6 +69,10 @@ in
     jq
     bun # needs `export PATH="$HOME/.bun/bin:$PATH"` for global installs
 
+    ### LSP (used by opencode, `"lsp": true` in ~/.config/opencode/opencode.json) ###
+    pyright
+    nixd
+
     ### SHELL ###
     blesh
 

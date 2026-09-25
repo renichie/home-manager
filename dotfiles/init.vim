@@ -45,7 +45,7 @@ require("lazy").setup({
     build = ":TSUpdate",
     config = function()
       require("nvim-treesitter.configs").setup({
-        ensure_installed = { "c", "lua", "vim", "vimdoc", "python", "javascript", "html", "typescript", "rust", "kotlin", "java" },  -- add languages you need
+        ensure_installed = { "c", "lua", "vim", "vimdoc", "python", "javascript", "html", "typescript", "rust", "kotlin", "java", "markdown", "markdown_inline" },  -- add languages you need
         sync_install = false,
         highlight = { enable = true, additional_vim_regex_highlighting = false },
         indent    = { enable = true },
@@ -58,10 +58,17 @@ require("lazy").setup({
       "nvim-lua/plenary.nvim",
       "nvim-telescope/telescope.nvim"
     },
-    config = function()
-      -- basic setup, no extras
-      require("emoji").setup({})
+    opts = {},
+    config = function(_, opts)
+      require("emoji").setup(opts)
+      local emoji_picker = require("telescope").load_extension("emoji")
+      vim.keymap.set("n", "<leader>se", emoji_picker.emoji, { desc = "Search emoji" })
     end,
+  },
+  {
+    "MeanderingProgrammer/render-markdown.nvim",
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+    opts = {},
   },
 })
 
