@@ -96,6 +96,7 @@ in
     oh-my-posh
     # vim
     neovim
+    gcc          # C compiler required for nvim-treesitter to build parsers
 
     ### Git ###
     git

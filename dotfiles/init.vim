@@ -41,6 +41,7 @@ require("lazy").setup({
   -- nvim-treesitter (better syntax highlighting / parsing)
   {
     "nvim-treesitter/nvim-treesitter",
+    branch = "master",   -- pin to the classic API; `main` is a rewrite without nvim-treesitter.configs
     build = ":TSUpdate",
     config = function()
       require("nvim-treesitter.configs").setup({
