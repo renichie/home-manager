@@ -69,9 +69,12 @@ in
     jq
     bun # needs `export PATH="$HOME/.bun/bin:$PATH"` for global installs
 
-    ### LSP (used by opencode, `"lsp": true` in ~/.config/opencode/opencode.json) ###
+    ### LSP (used by opencode, `"lsp"` config in ~/.config/opencode/opencode.json) ###
     pyright
     nixd
+    kotlin-language-server # explicit `lsp.kotlin-ls.command` override, since auto-detect is unreliable in nested Gradle multi-module repos
+    rust-analyzer # declarative fallback; rustup's ~/.cargo/bin/rust-analyzer still wins on PATH if present
+    # java: jdtls needs only a JDK (see `jdk` above) -- opencode auto-downloads and runs jdtls itself, no explicit override needed
 
     ### SHELL ###
     blesh
