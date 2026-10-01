@@ -1,0 +1,25 @@
+--- a/node_modules/@getpaseo/server/dist/server/server/agent/providers/acp-agent.js
++++ b/node_modules/@getpaseo/server/dist/server/server/agent/providers/acp-agent.js
+@@ -266,7 +266,22 @@
+         currentModeId: null,
+     };
+ }
++// Some agents advertise the same model id twice (Copilot CLI lists "auto"
++// twice); the app's Command Center throws on duplicate ids. First entry wins.
++function dedupeModelDefinitionsById(definitions) {
++    const seen = new Set();
++    return definitions.filter((definition) => {
++        if (seen.has(definition.id)) {
++            return false;
++        }
++        seen.add(definition.id);
++        return true;
++    });
++}
+ export function deriveModelDefinitionsFromACP(provider, models, configOptions) {
++    return dedupeModelDefinitionsById(deriveRawModelDefinitionsFromACP(provider, models, configOptions));
++}
++function deriveRawModelDefinitionsFromACP(provider, models, configOptions) {
+     const thinkingOptions = deriveSelectorOptions(configOptions, "thought_level");
+     const defaultThinkingOptionId = thinkingOptions.find((option) => option.isDefault)?.id ?? null;
+     if (models?.availableModels?.length) {

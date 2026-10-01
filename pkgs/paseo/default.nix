@@ -27,6 +27,7 @@ buildNpmPackage rec {
       ./package.json
       ./package-lock.json
       ./patches/junie-acp-mode-config-option.patch
+      ./patches/acp-dedupe-model-ids.patch
     ];
   };
 
@@ -47,6 +48,11 @@ buildNpmPackage rec {
 
     patch --batch --forward -d $out/lib/paseo -p1 \
       < ${./patches/junie-acp-mode-config-option.patch}
+
+    # Copilot's ACP model list contains "auto" twice, which crashes the app UI
+    # ("Duplicate Command Center contribution id"); still unfixed in 0.10.2.
+    patch --batch --forward -d $out/lib/paseo -p1 \
+      < ${./patches/acp-dedupe-model-ids.patch}
 
     # Mirrors the upstream bin/paseo shim, which runs dist/index.js with the
     # DEP0040 (punycode) warning silenced.
