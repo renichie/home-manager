@@ -84,7 +84,10 @@ EOF
   "${find_cmd[@]}" | while read -r gitdir; do
     repo="${gitdir%/.git}"
     local output
-    output="$(git -C "$repo" --no-pager -c color.ui=always "$@" 2>&1)"
+    # DFT_COLOR=always: difftastic (diff.external) erkennt hier kein TTY,
+    # da die Ausgabe per Command-Substitution eingefangen wird, und würde
+    # sonst trotz color.ui=always unfarbig ausgeben.
+    output="$(DFT_COLOR=always git -C "$repo" --no-pager -c color.ui=always "$@" 2>&1)"
 
     if [[ "$only_changed" -eq 1 ]]; then
       local plain
