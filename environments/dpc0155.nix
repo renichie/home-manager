@@ -62,6 +62,7 @@ in
     aoePackage # Agent of Empires (aoe) -- tmux session manager for AI coding agents, built with the web dashboard
     paseoDesktopPackage # Paseo desktop client (GUI for the paseo daemon from base.nix)
     gh
+    jira-cli-go # ankitpokhrel/jira-cli (jira)
     nodejs_22
     maven
     pnpm
