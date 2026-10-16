@@ -50,6 +50,21 @@ require("lazy").setup({
         highlight = { enable = true, additional_vim_regex_highlighting = false },
         indent    = { enable = true },
       })
+      if vim.fn.has("nvim-0.12") == 1 then
+        -- The classic plugin uses all=false, removed in 0.12: captures are now node lists.
+        require("nvim-treesitter.query_predicates")
+        vim.treesitter.query.add_directive("set-lang-from-info-string!", function(match, _, bufnr, pred, metadata)
+          local nodes = match[pred[2]]
+          local node = nodes and nodes[1]
+          if not node then
+            return
+          end
+          local language = vim.treesitter.get_node_text(node, bufnr):lower()
+          local aliases = { ex = "elixir", pl = "perl", sh = "bash", uxn = "uxntal", ts = "typescript" }
+          metadata["injection.language"] = vim.filetype.match({ filename = "a." .. language })
+            or aliases[language] or language
+        end, { force = true })
+      end
     end,
   },
   {
@@ -67,8 +82,46 @@ require("lazy").setup({
   },
   {
     "MeanderingProgrammer/render-markdown.nvim",
+    lazy = false,  -- load at startup, not only when the toggle key is pressed
     dependencies = { "nvim-treesitter/nvim-treesitter" },
-    opts = {},
+    opts = {
+      enabled = true,
+      render = { diff = true },  -- also render Markdown in Diffview windows
+    },
+    keys = {
+      { "<leader>mr", "<cmd>RenderMarkdown toggle<cr>", desc = "Toggle Markdown rendering" },
+    },
+  },
+  {
+    "sindrets/diffview.nvim",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewFileHistory", "DiffviewToggleFiles", "DiffviewFocusFiles", "DiffviewRefresh" },
+    opts = {
+      use_icons = false,
+      hooks = {
+        diff_buf_win_enter = function(bufnr, winid)
+          if vim.bo[bufnr].filetype == "markdown" then
+            vim.wo[winid].foldenable = false
+            -- Diffview fills revision buffers asynchronously; render after entering the window.
+            vim.defer_fn(function()
+              if not vim.api.nvim_buf_is_valid(bufnr)
+                or not vim.api.nvim_win_is_valid(winid)
+                or vim.api.nvim_win_get_buf(winid) ~= bufnr then
+                return
+              end
+              local markdown = require("render-markdown")
+              -- New revision buffers should inherit the current toggle state, including off.
+              markdown.set(markdown.get())
+            end, 150)
+          end
+        end,
+      },
+    },
+    keys = {
+      { "<leader>gd", "<cmd>DiffviewOpen<cr>", desc = "Open Git diff" },
+      { "<leader>gq", "<cmd>DiffviewClose<cr>", desc = "Close Git diff" },
+      { "<leader>gh", "<cmd>DiffviewFileHistory %<cr>", desc = "Current file history" },
+    },
   },
 })
 
