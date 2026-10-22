@@ -41,30 +41,43 @@ require("lazy").setup({
   -- nvim-treesitter (better syntax highlighting / parsing)
   {
     "nvim-treesitter/nvim-treesitter",
-    branch = "master",   -- pin to the classic API; `main` is a rewrite without nvim-treesitter.configs
+    branch = "main",
+    lazy = false,
     build = ":TSUpdate",
     config = function()
-      require("nvim-treesitter.configs").setup({
-        ensure_installed = { "c", "lua", "vim", "vimdoc", "python", "javascript", "html", "typescript", "rust", "kotlin", "java", "markdown", "markdown_inline" },  -- add languages you need
-        sync_install = false,
-        highlight = { enable = true, additional_vim_regex_highlighting = false },
-        indent    = { enable = true },
-      })
-      if vim.fn.has("nvim-0.12") == 1 then
-        -- The classic plugin uses all=false, removed in 0.12: captures are now node lists.
-        require("nvim-treesitter.query_predicates")
-        vim.treesitter.query.add_directive("set-lang-from-info-string!", function(match, _, bufnr, pred, metadata)
-          local nodes = match[pred[2]]
-          local node = nodes and nodes[1]
-          if not node then
-            return
-          end
-          local language = vim.treesitter.get_node_text(node, bufnr):lower()
-          local aliases = { ex = "elixir", pl = "perl", sh = "bash", uxn = "uxntal", ts = "typescript" }
-          metadata["injection.language"] = vim.filetype.match({ filename = "a." .. language })
-            or aliases[language] or language
-        end, { force = true })
+      local treesitter = require("nvim-treesitter")
+      local parsers = { "c", "lua", "vim", "vimdoc", "python", "javascript", "html", "typescript", "rust", "kotlin", "java", "markdown", "markdown_inline" }
+      treesitter.setup({})
+
+      local function enable_treesitter(bufnr)
+        local language = vim.treesitter.language.get_lang(vim.bo[bufnr].filetype)
+        if not language or not vim.list_contains(treesitter.get_installed("parsers"), language) then
+          return
+        end
+        vim.treesitter.start(bufnr, language)
+        if vim.treesitter.query.get(language, "indents") then
+          vim.bo[bufnr].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        end
       end
+
+      vim.api.nvim_create_autocmd("FileType", {
+        group = vim.api.nvim_create_augroup("TreesitterFeatures", { clear = true }),
+        callback = function(event)
+          enable_treesitter(event.buf)
+        end,
+      })
+      -- Install missing parsers without blocking startup; attach already opened buffers afterwards.
+      treesitter.install(parsers):await(vim.schedule_wrap(function(err)
+        if err then
+          vim.notify(tostring(err), vim.log.levels.ERROR)
+          return
+        end
+        for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+          if vim.api.nvim_buf_is_loaded(bufnr) then
+            enable_treesitter(bufnr)
+          end
+        end
+      end))
     end,
   },
   {
@@ -87,6 +100,7 @@ require("lazy").setup({
     opts = {
       enabled = true,
       render = { diff = true },  -- also render Markdown in Diffview windows
+      debounce = 0,  -- do not drop render events while Diffview creates and displays its buffers
     },
     keys = {
       { "<leader>mr", "<cmd>RenderMarkdown toggle<cr>", desc = "Toggle Markdown rendering" },
@@ -102,17 +116,9 @@ require("lazy").setup({
         diff_buf_win_enter = function(bufnr, winid)
           if vim.bo[bufnr].filetype == "markdown" then
             vim.wo[winid].foldenable = false
-            -- Diffview fills revision buffers asynchronously; render after entering the window.
-            vim.defer_fn(function()
-              if not vim.api.nvim_buf_is_valid(bufnr)
-                or not vim.api.nvim_win_is_valid(winid)
-                or vim.api.nvim_win_get_buf(winid) ~= bufnr then
-                return
-              end
-              local markdown = require("render-markdown")
-              -- New revision buffers should inherit the current toggle state, including off.
-              markdown.set(markdown.get())
-            end, 150)
+            local markdown = require("render-markdown")
+            -- Revision buffers inherit the current rendering toggle, including off.
+            markdown.set(markdown.get())
           end
         end,
       },

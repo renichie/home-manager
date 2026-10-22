@@ -97,6 +97,8 @@ in
     # vim
     neovim
     gcc          # C compiler required for nvim-treesitter to build parsers
+    tree-sitter  # CLI required by nvim-treesitter's current parser installer
+    gnutar
 
     ### Git ###
     git
