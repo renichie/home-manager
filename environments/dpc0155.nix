@@ -56,6 +56,7 @@ in
     kubectx
     kubecolor
     kubeseal
+    argo-workflows # Argo Workflows CLI (argo)
     krew # needs `export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH` for installs
 
     ### DEVELOPMENT PACKAGES ###
@@ -112,6 +113,46 @@ in
       exec chromium --disable-web-security --user-data-dir="/tmp/chromium-disabled-ws" --no-sandbox
     '';
     executable = true;
+  };
+
+  # Configure Ubuntu's GNOME Terminal directly; keep the existing profiles available.
+  dconf.settings = {
+    "org/gnome/terminal/legacy/profiles:".list = [
+      "b1dcc9dd-5262-4d8d-a863-c897e6d979b9" # default
+      "6d98d32c-e3fb-4b49-95b0-c128ac0ee9d9" # profile01
+      "64baec86-5728-47fa-98d3-92c003edca41" # Typewriter
+    ];
+    "org/gnome/terminal/legacy/profiles:/:64baec86-5728-47fa-98d3-92c003edca41" = {
+      visible-name = "Typewriter";
+      use-theme-colors = false;
+      background-color = "#262626";
+      foreground-color = "#c5b8a1";
+      bold-color-same-as-fg = true;
+      bold-is-bright = false;
+      # ANSI order: black, red, green, yellow, blue, magenta, cyan, white; then bright.
+      palette = [
+        "#3a342e" "#d47766" "#8faf78" "#d4aa66"
+        "#6c99bb" "#ab8fc0" "#80aaa3" "#c5b8a1"
+        "#999999" "#e69a89" "#b4d273" "#e5b567"
+        "#92b5d0" "#c0a6d2" "#a0c5bb" "#e4d8c3"
+      ];
+      cursor-shape = "block";
+      cursor-colors-set = true;
+      cursor-background-color = "#519d5c";
+      cursor-foreground-color = "#262626";
+      highlight-colors-set = true;
+      highlight-background-color = "#50473e";
+      highlight-foreground-color = "#e4d8c3";
+      use-theme-transparency = false;
+      use-transparent-background = false;
+      use-system-font = false;
+      font = "Hack Nerd Font 12";
+      audible-bell = false;
+      scroll-on-output = false;
+      scrollback-lines = 10000;
+      default-size-columns = 180;
+      default-size-rows = 24;
+    };
   };
 
   home.file.".blerc".text = ''

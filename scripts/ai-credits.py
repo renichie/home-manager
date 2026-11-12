@@ -12,9 +12,10 @@ tools that were simply never installed here.
 
 Providers and where the numbers come from:
 
-  copilot   GitHub Copilot premium interactions, via `gh api /copilot_internal/user`.
-            Uses the gh token from the system keyring, so it follows whatever host
-            `gh` is logged in to (here: a GHE enterprise). Live.
+  copilot   GitHub Copilot AI credits (or legacy premium interactions), via
+            `gh api /copilot_internal/user`. Uses the gh token from the system
+            keyring for Copilot's active host. COPILOT_GH_HOST / GH_HOST override
+            the host from ~/.copilot/config.json. Live.
 
   codex     ChatGPT/Codex rate-limit windows, via the undocumented endpoint
             https://chatgpt.com/backend-api/wham/usage, authenticated with the
@@ -71,6 +72,7 @@ import subprocess
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor
@@ -299,11 +301,31 @@ def severity(entry: dict) -> str:
 # --------------------------------------------------------------------------
 
 
+def _copilot_host() -> str | None:
+    host = os.environ.get("COPILOT_GH_HOST") or os.environ.get("GH_HOST")
+    if not host:
+        try:
+            with open(os.path.join(HOME, ".copilot", "config.json")) as fh:
+                # Copilot now prepends // comments to its managed JSON config.
+                config = json.loads("".join(line for line in fh if not line.lstrip().startswith("//")))
+            user = config.get("lastLoggedInUser") or config.get("last_logged_in_user") or {}
+            host = user.get("host")
+        except (OSError, ValueError, AttributeError):
+            pass
+    if not host:
+        return None
+    return urllib.parse.urlsplit(host if "://" in host else f"https://{host}").hostname
+
+
 def fetch_copilot() -> dict:
     label, short = "Copilot", "cp"
+    command = ["gh", "api", "/copilot_internal/user"]
+    host = _copilot_host()
+    if host:
+        command.extend(["--hostname", host])
     try:
         proc = subprocess.run(
-            ["gh", "api", "/copilot_internal/user"],
+            command,
             capture_output=True,
             text=True,
             timeout=HTTP_TIMEOUT + 4,
@@ -321,19 +343,23 @@ def fetch_copilot() -> dict:
     reset = iso_to_epoch(body.get("quota_reset_date"))
     plan = body.get("copilot_plan")
     note = f"plan: {plan}" if plan else ""
+    scope = "AI credits" if quota.get("token_based_billing") else "premium interactions"
+    remaining = quota.get("quota_remaining")
+    if remaining is None:
+        remaining = quota.get("remaining")
 
     if quota.get("unlimited"):
         return result(
             "copilot", label, short, "ok",
-            pct=100.0, reset=reset, scope="premium interactions (unlimited)", note=note,
+            pct=100.0, reset=reset, scope=f"{scope} (unlimited)", note=note,
         )
     return result(
         "copilot", label, short, "ok",
         pct=quota.get("percent_remaining"),
-        remaining=quota.get("remaining"),
+        remaining=remaining,
         total=quota.get("entitlement"),
         reset=reset,
-        scope="premium interactions",
+        scope=scope,
         note=note,
     )
 

@@ -4,7 +4,7 @@
 
 # ------------------------------ Git ---------------------------------
 gitall() {
-  local max_repo_depth="2"
+  local max_repo_depth="3"
   local only_changed=0
 
   case "${1:-}" in
@@ -18,7 +18,7 @@ Verwendung:
 
 Optionen:
   --depth N        Maximale Repo-Tiefe relativ zum aktuellen Verzeichnis.
-  --depth=N        Standard ist 2. Beispiel: 0 = nur aktuelles Repo, 1 = direkte Unterordner.
+  --depth=N        Standard ist 3. Beispiel: 0 = nur aktuelles Repo, 1 = direkte Unterordner.
   --only-changed   Zeigt nur Repos mit tatsächlichen Änderungen/Ergebnissen.
                    Bei "status": versteckt Repos, die sauber und up to date sind.
                    Bei anderen Subcommands: versteckt Repos ohne Ausgabe.

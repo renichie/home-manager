@@ -19,7 +19,7 @@ let
       _init_completion || return
 
       local features="vim theme appearance snippets hotkeys core-plugins community-plugins daily-notes templates graph app-settings bookmarks canvas backlink page-preview command-palette all sensible"
-      local opts="--list --interactive --dry-run -l -i -n"
+      local opts="--list --interactive --dry-run --all --sensible -l -i -n"
 
       case "$prev" in
         --list|-l)
@@ -38,7 +38,7 @@ let
       for ((i=1; i<cword; i++)); do
         local w="''${words[i]}"
         case "$w" in
-          --list|-l|--interactive|-i|--dry-run|-n) ;;
+          --list|-l|--interactive|-i|--dry-run|-n|--all|--sensible) ;;
           -*) ;;
           *) ((positionals++)) ;;
         esac
@@ -293,9 +293,11 @@ in
       # both up via .bashrc, a systemd unit does not.
       Environment = [
         "PASEO_HOME=${config.home.homeDirectory}/.paseo"
+        "PASEO_LISTEN=127.0.0.1:6767"
+        "PASEO_WEB_UI_ENABLED=true"
         "PATH=${config.home.profileDirectory}/bin:${config.home.homeDirectory}/.bun/bin:${config.home.homeDirectory}/.local/bin:/usr/local/bin:/usr/bin:/bin"
       ];
-      ExecStart = "${paseoPackage}/bin/paseo start --foreground --listen 127.0.0.1:6767 --web-ui";
+      ExecStart = "${paseoPackage}/bin/paseo daemon run";
       Restart = "on-failure";
       RestartSec = "10s";
     };

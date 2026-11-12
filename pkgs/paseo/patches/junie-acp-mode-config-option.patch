@@ -1,15 +1,15 @@
 --- a/node_modules/@getpaseo/server/dist/server/server/agent/providers/generic-acp-agent.js
 +++ b/node_modules/@getpaseo/server/dist/server/server/agent/providers/generic-acp-agent.js
-@@ -35,7 +35,21 @@ export class GenericACPAgentClient extends ACPAgentClient {
+@@ -19,7 +19,21 @@ export class GenericACPAgentClient extends ACPAgentClient {
              clientCapabilityMeta: options.clientCapabilityMeta,
              configFeatureOptions: options.configFeatureOptions,
              extensionCommandsParser: options.extensionCommandsParser,
              catalogModelResolver: options.catalogModelResolver,
-+            providerModeWriter: providerParams.modeConfigOptionId
++            providerModeWriter: options.providerParams?.modeConfigOptionId
 +                ? async ({ connection, sessionId, requestedModeId }) => {
 +                    const response = await connection.setSessionConfigOption({
 +                        sessionId,
-+                        configId: providerParams.modeConfigOptionId,
++                        configId: options.providerParams.modeConfigOptionId,
 +                        value: requestedModeId,
 +                    });
 +                    return {
@@ -19,6 +19,16 @@
 +                    };
 +                }
 +                : undefined,
+             now: options.now,
          });
          this.command = options.command;
-         this.providerId = options.providerId;
+--- a/node_modules/@getpaseo/server/dist/server/server/agent/provider-registry.js
++++ b/node_modules/@getpaseo/server/dist/server/server/agent/provider-registry.js
+@@ -518,6 +518,7 @@
+                         env: override.env,
+                         providerId,
+                         label: override.label ?? providerId,
++                        providerParams: configuredProviderOptions(override),
+                     };
+                     if (providerId === "cursor") {
+                         return new CursorACPAgentClient(acpOptions);

@@ -18,11 +18,11 @@
 
 let
   pname = "paseo-desktop";
-  version = "0.7.2";
+  version = "0.15.4";
 
   src = fetchurl {
     url = "https://github.com/getpaseo/paseo/releases/download/v${version}/Paseo-x86_64.AppImage";
-    sha256 = "sha256-VjUdZF3MY3/OR9P1gCVkesBG6otIj9eFjTAkKo22mxY=";
+    sha256 = "sha256-o13hO7lkLnXkGMKQbvVKskxTZBQGRRmdLPLZ7z1cd5c=";
   };
 
   # Plain unsquashfs (via a runCommand), no bwrap involved.
@@ -47,7 +47,7 @@ stdenvNoCC.mkDerivation {
     install -Dm444 ${appimageContents}/Paseo.desktop $out/share/applications/paseo.desktop
     install -Dm444 ${appimageContents}/Paseo.png $out/share/icons/hicolor/512x512/apps/paseo.png
     substituteInPlace $out/share/applications/paseo.desktop \
-      --replace-fail 'Exec=AppRun --no-sandbox %U' 'Exec=${pname} %U' \
+      --replace-fail 'Exec=AppRun --class=Paseo %U' 'Exec=${pname} --class=Paseo %U' \
       --replace-fail 'Icon=Paseo' 'Icon=paseo'
 
     runHook postInstall

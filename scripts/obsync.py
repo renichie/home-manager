@@ -541,6 +541,10 @@ examples:
     p.add_argument("--list", "-l", action="store_true", help="List all available features and exit")
     p.add_argument("--interactive", "-i", action="store_true", help="Interactively select features to copy")
     p.add_argument("--dry-run", "-n", action="store_true", help="Show what would happen without making changes")
+    p.add_argument("--all", dest="presets", action="append_const", const="all", default=[],
+                   help="Copy all features")
+    p.add_argument("--sensible", dest="presets", action="append_const", const="sensible",
+                   help="Copy the recommended subset of features")
     p.add_argument("source", nargs="?", metavar="SOURCE", help="Path to the source vault")
     p.add_argument("target", nargs="?", metavar="TARGET", help="Path to the target vault")
     p.add_argument("features", nargs="*", metavar="FEATURE", help="Features to copy (or 'all' / 'sensible')")
@@ -549,7 +553,7 @@ examples:
 
 def main():
     parser = build_parser()
-    args = parser.parse_args()
+    args = parser.parse_intermixed_args()
 
     if args.list:
         print_feature_list()
@@ -579,8 +583,8 @@ def main():
         if not features:
             print("No features selected.")
             sys.exit(0)
-    elif args.features:
-        features = resolve_features(args.features)
+    elif args.presets or args.features:
+        features = resolve_features(args.presets + args.features)
     else:
         print("obsync: no features specified. Use --list to see options or --interactive to select.\n")
         parser.print_usage()

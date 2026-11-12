@@ -18,7 +18,7 @@
 
 buildNpmPackage rec {
   pname = "paseo";
-  version = "0.7.2";
+  version = "0.15.4";
 
   # Only the two manifests matter; the actual code comes from the npm registry.
   src = lib.fileset.toSource {
@@ -31,7 +31,7 @@ buildNpmPackage rec {
     ];
   };
 
-  npmDepsHash = "sha256-pGv7r+fB4erZchO+sxTu5ebVyxMUAMPq8p+1OiwJJXY=";
+  npmDepsHash = "sha256-UQ/bxwAFjJsK/7bEHpc8XPfZuur64WpA2QL57Jd6kls=";
 
   # python3 is for node-pty, whose install script falls back to `node-gyp
   # rebuild` once its prebuilt-binary download fails in the sandbox.
@@ -50,7 +50,7 @@ buildNpmPackage rec {
       < ${./patches/junie-acp-mode-config-option.patch}
 
     # Copilot's ACP model list contains "auto" twice, which crashes the app UI
-    # ("Duplicate Command Center contribution id"); still unfixed in 0.10.2.
+    # ("Duplicate Command Center contribution id"); still unfixed in 0.15.4.
     patch --batch --forward -d $out/lib/paseo -p1 \
       < ${./patches/acp-dedupe-model-ids.patch}
 
