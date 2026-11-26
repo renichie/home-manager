@@ -117,6 +117,9 @@ in
 
   # Configure Ubuntu's GNOME Terminal directly; keep the existing profiles available.
   dconf.settings = {
+    # Hide desktop icons: Ubuntu draws them via the Desktop Icons NG (ding) extension.
+    "org/gnome/shell".disabled-extensions = [ "ding@rastersoft.com" ];
+
     "org/gnome/terminal/legacy/profiles:".list = [
       "b1dcc9dd-5262-4d8d-a863-c897e6d979b9" # default
       "6d98d32c-e3fb-4b49-95b0-c128ac0ee9d9" # profile01
@@ -298,6 +301,18 @@ in
   # 127.0.0.1 only (add --host/--remote if you ever need it reachable
   # off-box). Run in the foreground under systemd rather than aoe's own
   # --daemon flag, matching the syncthing/ydotoold services above.
+  # Memory budget for agents.slice (CPUWeight lives in base.nix), sized for
+  # 30 GB RAM: leaves >= 12 GB for desktop, Firefox, IDE, Docker. MemoryHigh
+  # throttles/reclaims (no kill); MemoryMax is only the safety net -- agent-run
+  # scopes use OOMPolicy=continue, so an OOM kill there hits a single process.
+  # Background: repeated global OOM kills + nvidia/gnome-shell crashes, see
+  # main-work-vault "SETUP DPC0155" (2026-11-23).
+  systemd.user.slices.agents.Slice = {
+    MemoryHigh = "14G";
+    MemoryMax = "18G";
+    MemorySwapMax = "2G";
+  };
+
   systemd.user.services.aoe-serve = {
     Unit = {
       Description = "Agent of Empires web dashboard";
@@ -308,6 +323,7 @@ in
     };
     Service = {
       ExecStart = "${aoePackage}/bin/aoe serve --host 127.0.0.1 --port 8080";
+      Slice = "agents.slice";
       Restart = "on-failure";
       RestartSec = "5s";
     };

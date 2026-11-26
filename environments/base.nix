@@ -180,6 +180,12 @@ in
       executable = true;
     };
 
+    # Runs agents in a transient scope inside agents.slice (see below).
+    ".local/bin/agent-run" = {
+      source = "${scriptfilesDir}/agent-run.sh";
+      executable = true;
+    };
+
     # AI provider quota overview (Copilot / Codex / Claude / JetBrains AI).
     # Also feeds the $AI_CREDITS prompt segment via ~/.cache/ai-credits.prompt.
     ".local/bin/ai-credits" = {
@@ -190,6 +196,8 @@ in
     ".config/nvim/init.vim".source = lib.mkForce "${dotfilesDir}/init.vim";
     ".ideavimrc".source = "${dotfilesDir}/.vimrc";
     ".tmux.conf".source = lib.mkForce "${dotfilesDir}/.tmux.conf";
+    ".config/tmux/themes".source = "${dotfilesDir}/tmux-themes";
+    ".config/alacritty/alacritty.toml".source = "${dotfilesDir}/alacritty.toml";
     ".gitconfig".source = "${dotfilesDir}/.gitconfig";
     ".gitignore_global".source = "${dotfilesDir}/.gitignore_global";
     ".lesskey".source = "${dotfilesDir}/.lesskey";
@@ -270,6 +278,15 @@ in
     };
   };
 
+  # Shared resource budget for all coding agents (agent-run, sbx-*, paseo,
+  # aoe). CPUWeight 20 vs. the default 100 of app.slice/session.slice: under
+  # contention the desktop, terminal and input chain win, idle cores are still
+  # free for agents. Memory limits are host-specific (see e.g. dpc0155.nix).
+  systemd.user.slices.agents = {
+    Unit.Description = "Coding agents (shared resource budget)";
+    Slice.CPUWeight = 20;
+  };
+
   # Paseo daemon -- serves the CLI, the bundled web UI and any paired clients.
   # Bound to loopback; relay is intentionally NOT pinned here with --no-relay
   # (that flag becomes a "launch override" that locks out `paseo daemon pair`/
@@ -298,6 +315,7 @@ in
         "PATH=${config.home.profileDirectory}/bin:${config.home.homeDirectory}/.bun/bin:${config.home.homeDirectory}/.local/bin:/usr/local/bin:/usr/bin:/bin"
       ];
       ExecStart = "${paseoPackage}/bin/paseo daemon run";
+      Slice = "agents.slice";
       Restart = "on-failure";
       RestartSec = "10s";
     };

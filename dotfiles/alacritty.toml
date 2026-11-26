@@ -1,0 +1,31 @@
+[window]
+# No title bar / window decorations (GNOME: move with Super+drag)
+decorations = "None"
+startup_mode = "Maximized" # or "Fullscreen"
+opacity = 0.95
+dimensions = { columns = 180, lines = 24 }
+
+[font]
+normal = { family = "Hack Nerd Font" }
+size = 12
+
+# Palette taken from the GNOME Terminal "default" profile
+[colors.normal]
+black = "#171421"
+red = "#c01c28"
+green = "#26a269"
+yellow = "#a2734c"
+blue = "#f0c674"
+magenta = "#a347ba"
+cyan = "#2aa1b3"
+white = "#eae1c7"
+
+[colors.bright]
+black = "#898989"
+red = "#f66151"
+green = "#33da7a"
+yellow = "#e9ad0c"
+blue = "#2a7bde"
+magenta = "#c061cb"
+cyan = "#33c7de"
+white = "#ffffff"

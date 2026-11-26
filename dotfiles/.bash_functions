@@ -116,17 +116,26 @@ EOF
 # Usage: copilot / codex / junie run plain on the host; *-sandboxed for sandboxed yolo.
 # "$(pwd -P)" instead of "$PWD": after the cwd is renamed, bash keeps the stale
 # logical path in $PWD; pwd -P always yields the physical, existing path.
-sbx()               { ~/.local/bin/agent-sandbox.sh "$(pwd -P)" "$@"; }
-sbx-copilot()       { ~/.local/bin/agent-sandbox.sh "$(pwd -P)" copilot "$@"; }
-sbx-copilot-yolo()  { ~/.local/bin/agent-sandbox.sh "$(pwd -P)" copilot --allow-all "$@"; }
-sbx-codex()         { ~/.local/bin/agent-sandbox.sh "$(pwd -P)" codex "$@"; }
-sbx-codex-yolo()    { ~/.local/bin/agent-sandbox.sh "$(pwd -P)" codex --dangerously-bypass-approvals-and-sandbox "$@"; }
-sbx-junie()         { ~/.local/bin/agent-sandbox.sh "$(pwd -P)" junie "$@"; }
-sbx-junie-yolo()    { ~/.local/bin/agent-sandbox.sh "$(pwd -P)" junie --brave "$@"; }
-sbx-nonet()         { NO_NET=1 ~/.local/bin/agent-sandbox.sh "$(pwd -P)" "$@"; }
+# All of them run via agent-run, i.e. inside agents.slice (shared CPU/RAM budget).
+sbx()               { agent-run ~/.local/bin/agent-sandbox.sh "$(pwd -P)" "$@"; }
+sbx-copilot()       { agent-run ~/.local/bin/agent-sandbox.sh "$(pwd -P)" copilot "$@"; }
+sbx-copilot-yolo()  { agent-run ~/.local/bin/agent-sandbox.sh "$(pwd -P)" copilot --allow-all "$@"; }
+sbx-codex()         { agent-run ~/.local/bin/agent-sandbox.sh "$(pwd -P)" codex "$@"; }
+sbx-codex-yolo()    { agent-run ~/.local/bin/agent-sandbox.sh "$(pwd -P)" codex --dangerously-bypass-approvals-and-sandbox "$@"; }
+sbx-junie()         { agent-run ~/.local/bin/agent-sandbox.sh "$(pwd -P)" junie "$@"; }
+sbx-junie-yolo()    { agent-run ~/.local/bin/agent-sandbox.sh "$(pwd -P)" junie --brave "$@"; }
+sbx-nonet()         { NO_NET=1 agent-run ~/.local/bin/agent-sandbox.sh "$(pwd -P)" "$@"; }
 copilot-sandboxed() { sbx-copilot-yolo "$@"; }
 codex-sandboxed()   { sbx-codex-yolo "$@"; }
 junie-sandboxed()   { sbx-junie-yolo "$@"; }
+
+# Plain (unsandboxed) agents, also inside agents.slice. agent-run execs the
+# binary from PATH, so these functions never recurse and updates via bun or the
+# agents' own updaters are picked up automatically. Bypass: `command claude ...`.
+claude()   { agent-run claude "$@"; }
+codex()    { agent-run codex "$@"; }
+opencode() { agent-run opencode "$@"; }
+junie()    { agent-run junie "$@"; }
 
 # ------------------------- AI quota prompt segment -------------------------
 # Feeds $AI_CREDITS, which the oh-my-posh theme renders as a text segment.
@@ -202,8 +211,9 @@ copilot() {
     unset WAYLAND_DISPLAY
     export XDG_SESSION_TYPE=x11
     if [[ -n $script ]] && command -v node >/dev/null; then
-      exec -a copilot node "$script" "$@"
+      # agent-run execs bash, which execs node with argv[0]=copilot.
+      exec agent-run bash -c 'exec -a copilot node "$0" "$@"' "$script" "$@"
     fi
-    command copilot "$@"
+    exec agent-run copilot "$@"
   )
 }
